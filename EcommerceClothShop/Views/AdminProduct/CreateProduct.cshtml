@@ -1,0 +1,44 @@
+﻿@model EcommerceClothShop.Models.Product
+@{
+    ViewBag.Title = "Create Product";
+}
+
+<h2>Add New Product</h2>
+
+@using (Html.BeginForm("CreateProduct", "AdminProduct", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label>Product Name</label>
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Price</label>
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control", type = "number", step = "0.01", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Stock</label>
+        @Html.TextBoxFor(m => m.Stock, new { @class = "form-control", type = "number", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Category</label>
+        @Html.DropDownList("CategoryID", ViewBag.Categories as SelectList, "Select Category", new { @class = "form-control", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Product Image</label>
+        <input type="file" name="ProductImage" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Product</button>
+    <a href="@Url.Action("ManageProducts")" class="btn btn-secondary">Cancel</a>
+}

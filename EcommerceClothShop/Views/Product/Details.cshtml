@@ -1,0 +1,124 @@
+﻿@model EcommerceClothShop.Models.Product
+@{
+    ViewBag.Title = "Product Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>@Model.Name</h2>
+
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-md-5">
+            <img src="@Model.ImageURL" alt="@Model.Name" class="img-fluid rounded">
+        </div>
+
+        <!-- Product Information -->
+        <div class="col-md-7">
+            <h4 class="text-success">Price: $@Model.Price</h4>
+            <p><strong>Description:</strong> @Model.Description</p>
+            <p><strong>Stock:</strong> @Model.Stock</p>
+            <p><strong>Category:</strong> @(Model.Category != null ? Model.Category.CategoryName : "Uncategorized")</p>
+
+            <!-- Add to Cart Button -->
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-success add-to-cart" data-product-id="@Model.ProductID">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    $(document).ready(function () {
+        $(".add-to-cart").click(function () {
+            var productId = $(this).data("product-id");
+            var token = $('input[name="__RequestVerificationToken"]').val(); // Get the token
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: { id: productId, __RequestVerificationToken: token }, // Include token
+                success: function (response) {
+                    if (response.success) {
+                        alert("Product added to cart!");
+                        $("#cart-count").text(response.cartCount);
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function () {
+                    alert("Error adding product to cart.");
+                }
+            });
+        });
+    });
+    </script>
+
+    <hr />
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <h3>Customer Reviews</h3>
+
+    @if (ViewBag.Reviews != null && ViewBag.Reviews.Count > 0)
+    {
+        <ul class="list-group">
+            @foreach (var review in ViewBag.Reviews)
+            {
+                <li class="list-group-item">
+                    <strong>
+                        @(review.User != null ? review.User.FullName : "Unknown User")
+                    </strong>
+                    <span class="text-warning">⭐ @review.Rating / 5</span>
+                    <p>@review.Comment</p>
+                    <small class="text-muted">@review.CreatedAt?.ToString("MMMM dd, yyyy")</small>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p>No reviews yet. Be the first to review this product!</p>
+    }
+
+    <hr />
+
+    <!-- Review Form (Only for Logged-in Users) -->
+    @if (Session["UserID"] != null)
+    {
+        <h4>Write a Review</h4>
+        using (Html.BeginForm("AddReview", "Product", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="productId" value="@Model.ProductID" />
+
+            <div class="form-group">
+                <label for="reviewText">Your Review:</label>
+                <textarea class="form-control" name="reviewText" rows="3" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="rating">Rating:</label>
+                <select class="form-control" name="rating" required>
+                    <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                    <option value="4">⭐⭐⭐⭐ - Good</option>
+                    <option value="3">⭐⭐⭐ - Average</option>
+                    <option value="2">⭐⭐ - Poor</option>
+                    <option value="1">⭐ - Terrible</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success">Submit Review</button>
+        }
+    }
+    else
+    {
+        <p><strong><a href="@Url.Action("Login", "Auth")">Log in</a> to write a review.</strong></p>
+    }
+</div>

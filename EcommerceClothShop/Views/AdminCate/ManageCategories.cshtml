@@ -1,0 +1,31 @@
+﻿@model IEnumerable<EcommerceClothShop.Models.Category>
+@{
+    ViewBag.Title = "Manage Categories";
+}
+
+<h2>Manage Categories</h2>
+
+<p>
+    <a href="@Url.Action("CreateCategory")" class="btn btn-success">Add New Category</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Category Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr>
+                <td>@category.CategoryName</td>
+                <td>
+                    <a href="@Url.Action("EditCategory", new { id = category.CategoryID })" class="btn btn-warning">Edit</a>
+                    <a href="@Url.Action("DeleteCategory", new { id = category.CategoryID })" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,38 @@
+﻿@model List<EcommerceClothShop.Models.User>
+
+@{
+    ViewBag.Title = "Manage Users";
+}
+
+<h2>Manage Users</h2>
+
+<p>
+    <a href="@Url.Action("CreateUser", "AdminUser")" class="btn btn-primary">Create New User</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserID</td>
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.Role</td>
+                <td>
+                    <a href="@Url.Action("EditUser", "AdminUser", new { id = user.UserID })" class="btn btn-warning">Edit</a>
+                    <a href="@Url.Action("DeleteUser", "AdminUser", new { id = user.UserID })" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

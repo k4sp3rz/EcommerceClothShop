@@ -1,0 +1,92 @@
+﻿@model List<EcommerceClothShop.Controllers.CartItem>
+@{
+    ViewBag.Title = "Shopping Cart";
+}
+
+<h2>Shopping Cart</h2>
+
+@if (Model.Count == 0)
+{
+    <p>Your cart is empty. <a href="@Url.Action("Index", "Product")">Continue Shopping</a></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr data-product-id="@item.Product.ProductID">
+                    <td>@item.Product.Name</td>
+                    <td>$@item.Product.Price</td>
+                    <td>
+                        <input type="number" min="1" class="form-control quantity-input"
+                               value="@item.Quantity" data-id="@item.Product.ProductID" />
+                    </td>
+                    <td class="total-price">$@(item.Product.Price * item.Quantity)</td>
+                    <td>
+                        <button class="btn btn-danger btn-remove" data-id="@item.Product.ProductID">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Total: <span id="cart-total">$@(Model.Sum(i => i.Product.Price * i.Quantity))</span></h4>
+
+    if (Session["UserID"] != null)
+    {
+        <a href="@Url.Action("Checkout", "Cart")" class="btn btn-success">Proceed to Checkout</a>
+    }
+    else
+    {
+        <a href="@Url.Action("Login", "Auth")" class="btn btn-primary">Login to Checkout</a>
+    }
+}
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Update Quantity
+            $(".quantity-input").change(function () {
+                var productId = $(this).data("id");
+                var quantity = $(this).val();
+
+                if (quantity < 1) {
+                    quantity = 1;
+                    $(this).val(1);
+                }
+
+                $.post("@Url.Action("UpdateCart", "Cart")", { id: productId, quantity: quantity }, function (data) {
+                    if (data.success) {
+                        $("tr[data-product-id='" + productId + "'] .total-price").text("$" + (quantity * data.total));
+                        $("#cart-total").text("$" + data.total);
+                        $("#cart-count").text(data.cartCount);
+                    }
+                });
+            });
+
+            // Remove Item
+            $(".btn-remove").click(function () {
+                var productId = $(this).data("id");
+                $.post("@Url.Action("RemoveFromCart", "Cart")", { id: productId }, function (data) {
+                    if (data.success) {
+                        $("tr[data-product-id='" + productId + "']").fadeOut(300, function () {
+                            $(this).remove();
+                            $("#cart-total").text("$" + data.total);
+                            $("#cart-count").text(data.cartCount);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

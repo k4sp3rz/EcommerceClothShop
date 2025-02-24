@@ -1,0 +1,19 @@
+﻿@model EcommerceClothShop.Models.Category
+@{
+    ViewBag.Title = "Create Category";
+}
+
+<h2>Add New Category</h2>
+
+@using (Html.BeginForm("CreateCategory", "AdminCate", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label>Category Name</label>
+        @Html.TextBoxFor(m => m.CategoryName, new { @class = "form-control", required = "required" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Category</button>
+    <a href="@Url.Action("ManageCategories")" class="btn btn-secondary">Cancel</a>
+}

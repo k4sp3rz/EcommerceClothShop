@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml"; <!-- Use your main layout -->
+}
+
+<h2>Admin Dashboard</h2>
+
+<div class="alert alert-success">
+    Welcome, <strong>@Session["UserName"]</strong>!
+</div>
+
+<ul class="list-group">
+    <li class="list-group-item"><a href="@Url.Action("ManageUsers", "AdminUser")">Manage Users</a></li>
+    <li class="list-group-item"><a href="@Url.Action("ManageProducts", "AdminProduct")">Manage Products</a></li>
+    <li class="list-group-item"><a href="@Url.Action("ManageCategories", "AdminCate")">Manage Categories</a></li>
+    <li class="list-group-item"><a href="@Url.Action("Orders", "Admin")">Manage Orders</a></li>
+</ul>
+<br>
+<a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">Logout</a>

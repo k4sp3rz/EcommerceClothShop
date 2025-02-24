@@ -1,0 +1,41 @@
+﻿@model IEnumerable<EcommerceClothShop.Models.Product>
+@{
+    ViewBag.Title = "Manage Products";
+}
+
+<h2>Manage Products</h2>
+
+<p>
+    <a href="@Url.Action("CreateProduct")" class="btn btn-success">Add New Product</a>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>
+                    <img src="@Url.Content(product.ImageURL)" alt="Product Image" width="50" height="50" />
+                </td>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("C")</td>
+                <td>@product.Stock</td>
+                <td>@(product.Category != null ? product.Category.CategoryName : "No Category")</td>
+                <td>
+                    <a href="@Url.Action("EditProduct", new { id = product.ProductID })" class="btn btn-warning">Edit</a>
+                    <a href="@Url.Action("DeleteProduct", new { id = product.ProductID })" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

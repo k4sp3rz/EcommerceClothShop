@@ -1,0 +1,38 @@
+﻿@model EcommerceClothShop.Models.User
+
+@{
+    ViewBag.Title = "User Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>User Details</h2>
+    <hr />
+
+    <div class="card shadow-sm p-4">
+        <div class="row">
+            <!-- User Info -->
+            <div class="col-md-8">
+                <h4>@Model.FullName</h4>
+                <p><strong>Email:</strong> @Model.Email</p>
+                <p><strong>Phone:</strong> @(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</p>
+                <p><strong>Address:</strong> @(string.IsNullOrEmpty(Model.Address) ? "Not provided" : Model.Address)</p>
+                <p><strong>Role:</strong> <span class="badge @(Model.Role == "admin" ? "bg-danger" : "bg-primary")">@Model.Role</span></p>
+                <p><strong>Member Since:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
+            </div>
+        </div>
+    </div>
+    <a href="@Url.Action("Edit", "User", new { id = Model.UserID })" class="btn btn-warning">Edit Profile</a>
+    @if (Session["UserRole"] != null && Session["UserRole"].ToString() == "admin")
+    {
+            <a class="btn btn-warning" href="@Url.Action("Dashboard", "Admin")">Admin Dashboard</a>
+    }
+    <hr />
+
+    <!-- User Orders -->
+    <h3>User Orders</h3>
+
+
+    <!-- User Reviews -->
+
+</div>

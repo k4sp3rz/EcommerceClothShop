@@ -1,0 +1,52 @@
+﻿@model IEnumerable<EcommerceClothShop.Models.Product>
+
+@{
+    ViewBag.Title = "Shop Products";
+}
+
+<h2 class="mb-4 text-center">Our Products</h2>
+
+<div class="row">
+    @foreach (var product in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="@product.ImageURL" class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+                    <p class="card-text text-muted">
+                        @(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)
+                    </p>
+                    <p class="font-weight-bold">$@product.Price</p>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" class="btn btn-primary">View Details</a>
+                        <button class="btn btn-success add-to-cart" data-product-id="@product.ProductID">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".add-to-cart").click(function () {
+            var productId = $(this).data("product-id");
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: { id: productId },
+                success: function (response) {
+                    alert("Product added to cart!");
+                    $("#cart-count").text(response.cartCount);
+                },
+                error: function () {
+                    alert("Error adding product to cart.");
+                }
+            });
+        });
+    });
+</script>

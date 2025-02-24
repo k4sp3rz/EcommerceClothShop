@@ -1,0 +1,49 @@
+﻿@model EcommerceClothShop.Models.Product
+@{
+    ViewBag.Title = "Edit Product";
+}
+
+<h2>Edit Product</h2>
+
+@using (Html.BeginForm("EditProduct", "ProductAdmin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.ProductID)
+
+    <div class="form-group">
+        <label>Product Name</label>
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Price</label>
+        @Html.TextBoxFor(m => m.Price, new { @class = "form-control", type = "number", step = "0.01", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Stock</label>
+        @Html.TextBoxFor(m => m.Stock, new { @class = "form-control", type = "number", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Category</label>
+        @Html.DropDownList("CategoryID", ViewBag.Categories as SelectList, "Select Category", new { @class = "form-control", required = "required" })
+    </div>
+
+    <div class="form-group">
+        <label>Product Image</label>
+        <input type="file" name="ProductImage" class="form-control" />
+        @if (!string.IsNullOrEmpty(Model.ImageURL))
+        {
+            <img src="@Model.ImageURL" alt="Product Image" width="100" />
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Product</button>
+    <a href="@Url.Action("ManageProducts")" class="btn btn-secondary">Cancel</a>
+}

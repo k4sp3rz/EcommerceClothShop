@@ -1,0 +1,20 @@
+﻿@model EcommerceClothShop.Models.Category
+@{
+    ViewBag.Title = "Edit Category";
+}
+
+<h2>Edit Category</h2>
+
+@using (Html.BeginForm("EditCategory", "AdminCate", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.CategoryID)
+
+    <div class="form-group">
+        <label>Category Name</label>
+        @Html.TextBoxFor(m => m.CategoryName, new { @class = "form-control", required = "required" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Category</button>
+    <a href="@Url.Action("ManageCategories")" class="btn btn-secondary">Cancel</a>
+}

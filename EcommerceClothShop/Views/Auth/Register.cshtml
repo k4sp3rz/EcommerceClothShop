@@ -1,0 +1,58 @@
+﻿@model EcommerceClothShop.Models.User
+
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mt-3">Create an Account</h2>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<div class="card mt-3">
+    <div class="card-body">
+        @using (Html.BeginForm("Register", "Auth", FormMethod.Post))
+        {
+            <div class="form-group">
+                <label>Full Name</label>
+                @Html.TextBoxFor(model => model.FullName, new { @class = "form-control", required = "required", placeholder = "Enter full name" })
+            </div>
+
+            <div class="form-group mt-2">
+                <label>Email</label>
+                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", type = "email", required = "required", placeholder = "Enter email" })
+            </div>
+
+            <div class="form-group mt-2">
+                <label>Password</label>
+                @Html.PasswordFor(model => model.PasswordHash, new { @class = "form-control", required = "required", placeholder = "Enter password" })
+            </div>
+
+            <div class="form-group mt-2">
+                <label>Confirm Password</label>
+                <input type="password" name="ConfirmPassword" class="form-control" required placeholder="Confirm password" />
+            </div>
+
+            <div class="form-group mt-2">
+                <label>Phone Number</label>
+                @Html.TextBoxFor(model => model.Phone, new { @class = "form-control", placeholder = "Enter phone number" })
+            </div>
+
+            <div class="form-group mt-2">
+                <label>Address</label>
+                @Html.TextAreaFor(model => model.Address, new { @class = "form-control", placeholder = "Enter address" })
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3">Register</button>
+            <a href="@Url.Action("Login", "Auth")" class="btn btn-link">Already have an account? Login</a>
+        }
+    </div>
+</div>

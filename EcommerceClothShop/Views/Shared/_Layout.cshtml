@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+        <div class="container">
+            @Html.ActionLink("Ecommerce Shop", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    title="Toggle navigation" aria-controls="navbarNav"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li class="nav-item">@Html.ActionLink("Shop", "Index", "Product", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li class="nav-item">@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                </ul>
+
+                <!-- Right-aligned navbar items -->
+                <ul class="navbar-nav ms-auto">
+                    <!-- Cart is visible to all users -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Cart")">
+                            Cart <span class="badge bg-danger" id="cart-count">
+                                @(Session["CartCount"] ?? "0")
+                            </span>
+                        </a>
+                    </li>
+
+                    @if (Session["UserName"] != null)
+                    {
+                        <!-- User Account -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Details", "User")">Account (@Session["UserName"])</a>
+                        </li>
+
+                        <!-- Logout -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Logout", "Auth")">Logout</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <!-- Login -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Login", "Auth")">Login</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Ecommerce Shop</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    <script>
+        function updateCartCount() {
+            $.get('@Url.Action("GetCartCount", "Cart")', function (data) {
+                $('#cart-count').text(data);
+            });
+        }
+
+        $(document).ready(function () {
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>
