@@ -1,0 +1,31 @@
+﻿@model IEnumerable<EcommerceClothShop.Models.Order>
+
+@{
+    ViewBag.Title = "Manage Orders";
+}
+
+<h2>Manage Orders</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>User ID</th>
+            <th>Total Amount</th>
+            <th>Order Status</th>
+            <th>Created At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderID</td>
+                <td>@order.UserID</td>
+                <td>@order.TotalAmount</td>
+                <td>@order.OrderStatus</td>
+                <td>@order.CreatedAt</td>
+            </tr>
+        }
+    </tbody>
+</table>

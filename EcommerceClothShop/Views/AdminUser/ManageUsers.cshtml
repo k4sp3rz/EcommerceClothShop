@@ -6,33 +6,92 @@
 
 <h2>Manage Users</h2>
 
+<!-- 🔍 Search & Filter Form -->
+<form method="get" action="@Url.Action("ManageUsers", "AdminUser")" class="mb-3">
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search by name or email" value="@Request.QueryString["search"]">
+        </div>
+
+        <div class="col-md-3">
+            <select name="role" class="form-control">
+                <option value="">All Roles</option>
+                @foreach (var role in ViewBag.Roles)
+                {
+                    <option value="@role" @(Request.QueryString["role"] == role ? "selected" : "")>@role</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
 <p>
-    <a href="@Url.Action("CreateUser", "AdminUser")" class="btn btn-primary">Create New User</a>
+    <a href="@Url.Action("CreateUser", "AdminUser")" class="btn btn-success">Create New User</a>
 </p>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in Model)
-        {
+<!-- 🔹 Multi-Select User Table -->
+<form method="post" action="@Url.Action("UpdateUserRoles", "AdminUser")">
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@user.UserID</td>
-                <td>@user.FullName</td>
-                <td>@user.Email</td>
-                <td>@user.Role</td>
-                <td>
-                    <a href="@Url.Action("EditUser", "AdminUser", new { id = user.UserID })" class="btn btn-warning">Edit</a>
-                    <a href="@Url.Action("DeleteUser", "AdminUser", new { id = user.UserID })" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
-                </td>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td><input type="checkbox" name="selectedUsers" value="@user.UserID"></td>
+                    <td>@user.UserID</td>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Role</td>
+                    <td>
+                        <a href="@Url.Action("EditUser", "AdminUser", new { id = user.UserID })" class="btn btn-warning">Edit</a>
+                        <a href="@Url.Action("DeleteUser", "AdminUser", new { id = user.UserID })" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-md-4">
+            <select name="newRole" class="form-control">
+                <option value="">Select New Role</option>
+                <option value="admin">Admin</option>
+                <option value="customer">Customer</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary" onclick="return confirm('Update selected users?');">Update Roles</button>
+        </div>
+    </div>
+</form>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<script>
+    $(document).ready(function () {
+        // 🔹 Select All Checkboxes
+        $("#select-all").click(function () {
+            $("input[name='selectedUsers']").prop("checked", this.checked);
+        });
+
+        // 🔹 Ensure selected filters persist after submitting the form
+        $('select[name="role"]').val("@Request.QueryString["role"]");
+    });
+</script>

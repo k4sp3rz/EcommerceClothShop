@@ -22,35 +22,85 @@
 
             <!-- Add to Cart Button -->
             <div class="d-flex justify-content-between">
-                <button class="btn btn-success add-to-cart" data-product-id="@Model.ProductID">Add to Cart</button>
+                <button class="btn btn-success add-to-cart" data-product-id="@Model.ProductID" data-product-name="@Model.Name">Add to Cart</button>
             </div>
         </div>
     </div>
-    <script>
-    $(document).ready(function () {
-        $(".add-to-cart").click(function () {
-            var productId = $(this).data("product-id");
-            var token = $('input[name="__RequestVerificationToken"]').val(); // Get the token
+    <!-- Quantity Selection Modal -->
+    <div class="modal fade" id="quantityModal" tabindex="-1" aria-labelledby="quantityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="quantityModalLabel">Select Quantity</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="product-name"></p>
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" class="form-control" min="1" value="1">
+                    <input type="hidden" id="selected-product-id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirm-add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            $.ajax({
-                url: '@Url.Action("AddToCart", "Cart")',
-                type: 'POST',
-                data: { id: productId, __RequestVerificationToken: token }, // Include token
-                success: function (response) {
-                    if (response.success) {
-                        alert("Product added to cart!");
-                        $("#cart-count").text(response.cartCount);
-                    } else {
-                        alert("Error: " + response.message);
-                    }
-                },
-                error: function () {
-                    alert("Error adding product to cart.");
-                }
-            });
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script>
+$(document).ready(function () {
+    var selectedProductId;
+
+    $(".add-to-cart").click(function () {
+        selectedProductId = $(this).data("product-id");
+        var productName = $(this).data("product-name");
+
+        $("#product-name").text("Adding: " + productName);
+        $("#selected-product-id").val(selectedProductId);
+
+        // Reset quantity to 1 when a new product is selected
+        $("#quantity").val(1);
+
+        $("#quantityModal").modal("show");
+    });
+
+    $("#confirm-add-to-cart").click(function () {
+        var productId = $("#selected-product-id").val();
+        var quantity = $("#quantity").val();
+
+        $.ajax({
+            url: '@Url.Action("AddToCart", "Cart")',
+            type: 'POST',
+            data: { id: productId, quantity: quantity },
+            success: function (response) {
+                alert("Product added to cart!");
+                $("#cart-count").text(response.cartCount);
+                $("#quantityModal").modal("hide");
+            },
+            error: function () {
+                alert("Error adding product to cart.");
+            }
         });
     });
+
+    // 🔹 Close modal on Cancel button click
+    $(".btn-secondary").click(function () {
+        $("#quantityModal").modal("hide");
+    });
+
+    // 🔹 Close modal on "×" button click
+    $(".close").click(function () {
+        $("#quantityModal").modal("hide");
+    });
+});
+
     </script>
+
 
     <hr />
 
@@ -77,7 +127,7 @@
                     </strong>
                     <span class="text-warning">⭐ @review.Rating / 5</span>
                     <p>@review.Comment</p>
-                    <small class="text-muted">@review.CreatedAt?.ToString("MMMM dd, yyyy")</small>
+                    <small class="text-muted">@review.CreatedAt.ToString("MMMM dd, yyyy")</small>
                 </li>
             }
         </ul>

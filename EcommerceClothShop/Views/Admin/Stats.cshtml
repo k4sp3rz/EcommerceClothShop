@@ -1,0 +1,36 @@
+﻿@model EcommerceClothShop.Models.OrderStatsViewModel
+
+@{
+    ViewBag.Title = "Order Statistics";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Detailed Order Statistics</h2>
+
+<p><strong>Total Revenue:</strong> @Model.TotalRevenue.ToString("C")</p>
+<p><strong>Total Orders:</strong> @Model.TotalOrders</p>
+<p><strong>Completed Orders:</strong> @Model.CompletedOrders</p>
+<p><strong>Pending Orders:</strong> @Model.PendingOrders</p>
+
+<h3>Orders Per Month (Last 6 Months)</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Month</th>
+            <th>Orders</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrdersPerMonth)
+        {
+            <tr>
+                <td>@item.Year</td>
+                <td>@item.Month</td>
+                <td>@item.OrderCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Dashboard", "Admin")" class="btn btn-primary">Back to Dashboard</a>

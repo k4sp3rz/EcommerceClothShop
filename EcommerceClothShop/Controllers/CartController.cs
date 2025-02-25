@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using EcommerceClothShop.Models;
@@ -17,7 +18,7 @@ namespace EcommerceClothShop.Controllers
         }
 
         [HttpPost]
-        public JsonResult AddToCart(int id)
+        public JsonResult AddToCart(int id, int quantity)
         {
             var cart = Session["Cart"] as List<CartItem> ?? new List<CartItem>();
             var product = db.Products.Find(id);
@@ -31,7 +32,7 @@ namespace EcommerceClothShop.Controllers
                 }
                 else
                 {
-                    cart.Add(new CartItem { Product = product, Quantity = 1 });
+                    cart.Add(new CartItem { Product = product, Quantity = quantity });
                 }
 
                 // Update session
@@ -119,6 +120,80 @@ namespace EcommerceClothShop.Controllers
 
             return View(cart);
         }
+        [HttpPost]
+        public ActionResult PlaceOrder(string paymentMethod)
+        {
+            var cart = Session["Cart"] as List<CartItem>;
+            int? userId = Session["UserID"] as int?;
+
+            if (cart == null || !cart.Any())
+            {
+                TempData["CartError"] = "Your cart is empty.";
+                return RedirectToAction("Index");
+            }
+
+            if (userId == null)
+            {
+                TempData["CheckoutError"] = "You must log in to proceed.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            Order order;
+
+            using (var db = new EcommerceClothShopEntities())
+            {
+                order = new Order
+                {
+                    UserID = userId.Value,
+                    TotalAmount = cart.Sum(item => item.Product.Price * item.Quantity),
+                    OrderStatus = "Pending",
+                    CreatedAt = DateTime.Now
+                };
+
+                db.Orders.Add(order);
+                db.SaveChanges();
+
+                foreach (var item in cart)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderID = order.OrderID,
+                        ProductID = item.Product.ProductID,
+                        Quantity = item.Quantity,
+                        Price = item.Product.Price
+                    };
+
+                    db.OrderDetails.Add(orderDetail);
+                }
+                var payment = new Payment
+                {
+                    OrderID = order.OrderID,
+                    PaymentMethod = paymentMethod,
+                    PaymentStatus = paymentMethod == "COD" ? "Pending" : "Paid",
+                    PaidAt = paymentMethod == "COD" ? (DateTime?)null : DateTime.Now
+                };
+
+                db.Payments.Add(payment);
+                db.SaveChanges();
+            }
+
+            Session["Cart"] = null;
+            Session["CartCount"] = 0;
+
+            return RedirectToAction("OrderConfirmation", new { orderId = order.OrderID });
+        }
+        public ActionResult OrderConfirmation(int orderId)
+        {
+            var order = db.Orders.Include("OrderDetails.Product").FirstOrDefault(o => o.OrderID == orderId);
+
+            if (order == null)
+            {
+                return RedirectToAction("Index", "Shop");
+            }
+
+            return View(order);
+        }
+
     }
 
     public class CartItem
@@ -126,4 +201,5 @@ namespace EcommerceClothShop.Controllers
         public Product Product { get; set; }
         public int Quantity { get; set; }
     }
+
 }

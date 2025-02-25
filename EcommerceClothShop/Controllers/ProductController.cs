@@ -8,13 +8,38 @@ namespace EcommerceClothShop.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly EcommerceClothShopEntities _context = new EcommerceClothShopEntities();
+        private EcommerceClothShopEntities _context = new EcommerceClothShopEntities();
 
-        // Display all products
-        public ActionResult Index()
+        public ActionResult Index(string search, int? categoryId, decimal? minPrice, decimal? maxPrice)
         {
-            var products = _context.Products.ToList();
-            return View(products);
+            var products = _context.Products.AsQueryable();
+
+            // 🔍 Filter by Search
+            if (!string.IsNullOrEmpty(search))
+            {
+                products = products.Where(p => p.Name.Contains(search));
+            }
+
+            // 📂 Filter by Category
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                products = products.Where(p => p.CategoryID == categoryId.Value);
+            }
+
+            // 💲 Filter by Price Range
+            if (minPrice.HasValue)
+            {
+                products = products.Where(p => p.Price >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                products = products.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            // Fetch categories for dropdown
+            ViewBag.Categories = _context.Categories.ToList();
+
+            return View(products.ToList());
         }
 
         public ActionResult Details(int id)

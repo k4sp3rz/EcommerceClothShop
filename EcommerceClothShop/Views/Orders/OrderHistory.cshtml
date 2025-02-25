@@ -1,0 +1,36 @@
+﻿@model IEnumerable<EcommerceClothShop.Models.Order>
+
+<h2>Your Order History</h2>
+
+@if (!Model.Any())
+{
+    <p>You have no past orders.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.OrderID</td>
+                    <td>@order.CreatedAt</td>
+                    <td>$@order.TotalAmount</td>
+                    <td>@order.OrderStatus</td>
+                    <td>
+                        <a href="@Url.Action("OrderDetails", "Orders", new { id = order.OrderID })" class="btn btn-info">View</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

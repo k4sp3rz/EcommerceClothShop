@@ -9,11 +9,46 @@
     Welcome, <strong>@Session["UserName"]</strong>!
 </div>
 
-<ul class="list-group">
+<!-- Chart Container -->
+<canvas id="ordersChart" width="400" height="200"></canvas>
+
+<ul class="list-group mt-4">
     <li class="list-group-item"><a href="@Url.Action("ManageUsers", "AdminUser")">Manage Users</a></li>
     <li class="list-group-item"><a href="@Url.Action("ManageProducts", "AdminProduct")">Manage Products</a></li>
     <li class="list-group-item"><a href="@Url.Action("ManageCategories", "AdminCate")">Manage Categories</a></li>
     <li class="list-group-item"><a href="@Url.Action("Orders", "Admin")">Manage Orders</a></li>
+    <li class="list-group-item"><a href="@Url.Action("Stats", "Admin")">View Detailed Stats</a></li>
 </ul>
+
 <br>
 <a href="@Url.Action("Logout", "Auth")" class="btn btn-danger">Logout</a>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document.getElementById('ordersChart').getContext('2d');
+
+        var chartData = {
+            labels: @Html.Raw(Json.Encode(ViewBag.Months)),
+            datasets: [{
+                label: 'Orders Per Month',
+                data: @Html.Raw(Json.Encode(ViewBag.OrderCounts)),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>

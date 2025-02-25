@@ -131,11 +131,14 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AdminCateController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\AdminPaymentController.cs" />
     <Compile Include="Controllers\AdminProductController.cs" />
+    <Compile Include="Controllers\AdminStatsController.cs" />
     <Compile Include="Controllers\AdminUserController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\CartController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
     <Compile Include="Controllers\ProductController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
@@ -171,6 +174,7 @@
     <Compile Include="Models\OrderDetail.cs">
       <DependentUpon>ClothingShopModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\OrderStatsViewModel.cs" />
     <Compile Include="Models\Payment.cs">
       <DependentUpon>ClothingShopModel.tt</DependentUpon>
     </Compile>
@@ -271,6 +275,14 @@
     <Content Include="Views\AdminCate\CreateCategory.cshtml" />
     <Content Include="Views\AdminCate\EditCategory.cshtml" />
     <Content Include="Views\Cart\Index.cshtml" />
+    <Content Include="Views\Orders\OrderHistory.cshtml" />
+    <Content Include="Views\AdminPayment\Index.cshtml" />
+    <Content Include="Views\Cart\Checkout.cshtml" />
+    <Content Include="Views\Cart\OrderConfirmation.cshtml" />
+    <Content Include="Views\Orders\OrderDetails.cshtml" />
+    <Content Include="Views\Admin\Orders.cshtml" />
+    <Content Include="Views\Admin\Stats.cshtml" />
+    <Content Include="Views\Shared\_AdminLayout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

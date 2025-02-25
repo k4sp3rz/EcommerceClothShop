@@ -9,14 +9,6 @@ public class AdminUserController : Controller
 {
 
 
-    public ActionResult ManageUsers()
-    {
-        using (var db = new EcommerceClothShopEntities()) // Replace with your actual DbContext
-        {
-            List<User> users = db.Users.ToList();
-            return View(users);
-        }
-    }
 
     public ActionResult CreateUser()
     {
@@ -104,6 +96,47 @@ public ActionResult DeleteUser(int id)
                 db.Users.Remove(user);
                 db.SaveChanges();
             }
+        }
+        return RedirectToAction("ManageUsers");
+    }
+    private EcommerceClothShopEntities db = new EcommerceClothShopEntities();
+
+    public ActionResult ManageUsers(string search, string role)
+    {
+        var users = db.Users.AsQueryable();
+
+        // 🔍 Filter by search (name or email)
+        if (!string.IsNullOrEmpty(search))
+        {
+            users = users.Where(u => u.FullName.Contains(search) || u.Email.Contains(search));
+        }
+
+        // 📂 Filter by role
+        if (!string.IsNullOrEmpty(role))
+        {
+            users = users.Where(u => u.Role == role);
+        }
+
+        // Pass roles to the view for filtering
+        ViewBag.Roles = db.Users.Select(u => u.Role).Distinct().ToList();
+
+        return View(users.ToList());
+    }
+
+    [HttpPost]
+    public ActionResult UpdateUserRoles(List<int> selectedUsers, string newRole)
+    {
+        if (selectedUsers != null && !string.IsNullOrEmpty(newRole))
+        {
+            var usersToUpdate = db.Users.Where(u => selectedUsers.Contains(u.UserID)).ToList();
+
+            foreach (var user in usersToUpdate)
+            {
+                user.Role = newRole;
+            }
+
+            db.SaveChanges();
+            TempData["SuccessMessage"] = "Selected users updated successfully!";
         }
         return RedirectToAction("ManageUsers");
     }

@@ -1,0 +1,66 @@
+﻿@model List<EcommerceClothShop.Controllers.CartItem>
+@{
+    ViewBag.Title = "Checkout";
+}
+
+<h2 class="text-center mb-4">Checkout</h2>
+
+@if (TempData["CheckoutError"] != null)
+{
+    <div class="alert alert-danger">@TempData["CheckoutError"]</div>
+}
+
+@if (TempData["CartError"] != null)
+{
+    <div class="alert alert-warning">@TempData["CartError"]</div>
+}
+
+@if (!Model.Any())
+{
+    <p class="text-center">Your cart is empty. <a href="@Url.Action("Index", "Shop")">Continue Shopping</a></p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Product.Name</td>
+                    <td>$@item.Product.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>$@(item.Product.Price * item.Quantity)</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-right">Total:</th>
+                <th>$@Model.Sum(i => i.Product.Price * i.Quantity)</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h4>Select Payment Method</h4>
+    <form method="post" action="@Url.Action("PlaceOrder", "Cart")">
+        <div class="form-group">
+            <label>
+                <input type="radio" name="paymentMethod" value="COD" checked> Cash on Delivery (COD)
+            </label>
+            <br>
+            <label>
+                <input type="radio" name="paymentMethod" value="Online"> Online Payment
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg btn-block">Place Order</button>
+    </form>
+}

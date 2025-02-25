@@ -1,0 +1,51 @@
+﻿@model IEnumerable<EcommerceClothShop.Models.Payment>
+
+@{
+    ViewBag.Title = "Payment Management";
+}
+
+<h2 class="mb-4">Payment Management</h2>
+
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Payment ID</th>
+                <th>Order ID</th>
+                <th>Payment Method</th>
+                <th>Status</th>
+                <th>Paid At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model)
+            {
+                <tr>
+                    <td>@payment.PaymentID</td>
+                    <td>@payment.OrderID</td>
+                    <td>@payment.PaymentMethod</td>
+                    <td>
+                        <span class="badge @(payment.PaymentStatus == "Approved" ? "badge-success" : payment.PaymentStatus == "Rejected" ? "badge-danger" : "badge-warning")">
+                            @payment.PaymentStatus
+                        </span>
+                    </td>
+                    <td>@(payment.PaidAt.HasValue ? payment.PaidAt.Value.ToString("yyyy-MM-dd HH:mm") : "Not Paid")</td>
+                    <td>
+                        <a href="@Url.Action("Details", "AdminPayment", new { id = payment.PaymentID })" class="btn btn-info btn-sm">Details</a>
+                        @if (payment.PaymentStatus == "Pending")
+                        {
+                            <a href="@Url.Action("Approve", "AdminPayment", new { id = payment.PaymentID })" class="btn btn-success btn-sm">Approve</a>
+                            <a href="@Url.Action("Reject", "AdminPayment", new { id = payment.PaymentID })" class="btn btn-danger btn-sm">Reject</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="alert alert-warning">No payments found.</p>
+}

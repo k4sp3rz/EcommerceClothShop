@@ -6,6 +6,40 @@
 
 <h2 class="mb-4 text-center">Our Products</h2>
 
+<!-- 🔍 Search and Filters -->
+<form method="get" action="@Url.Action("Index", "Product")" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search products..." value="@Request.QueryString["search"]">
+        </div>
+
+        <div class="col-md-3">
+            <select name="categoryId" class="form-control">
+                <option value="">All Categories</option>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <option value="@category.CategoryID" @(Request.QueryString["categoryId"] == category.CategoryID.ToString() ? "selected" : "")>
+                        @category.CategoryName
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" name="minPrice" class="form-control" placeholder="Min Price" value="@Request.QueryString["minPrice"]">
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" name="maxPrice" class="form-control" placeholder="Max Price" value="@Request.QueryString["maxPrice"]">
+        </div>
+
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<!-- 🔹 Display Products -->
 <div class="row">
     @foreach (var product in Model)
     {
@@ -21,7 +55,7 @@
 
                     <div class="d-flex justify-content-between">
                         <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" class="btn btn-primary">View Details</a>
-                        <button class="btn btn-success add-to-cart" data-product-id="@product.ProductID">Add to Cart</button>
+                        <button class="btn btn-success add-to-cart" data-product-id="@product.ProductID" data-product-name="@product.Name">Add to Cart</button>
                     </div>
                 </div>
             </div>
@@ -29,24 +63,15 @@
     }
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@if (!Model.Any())
+{
+    <p class="text-center text-danger">No products found.</p>
+}
 <script>
     $(document).ready(function () {
-        $(".add-to-cart").click(function () {
-            var productId = $(this).data("product-id");
-
-            $.ajax({
-                url: '@Url.Action("AddToCart", "Cart")',
-                type: 'POST',
-                data: { id: productId },
-                success: function (response) {
-                    alert("Product added to cart!");
-                    $("#cart-count").text(response.cartCount);
-                },
-                error: function () {
-                    alert("Error adding product to cart.");
-                }
-            });
-        });
+        // Ensure selected filters persist after submitting the form
+        $('select[name="categoryId"]').val("@Request.QueryString["categoryId"]");
+        $('input[name="minPrice"]').val("@Request.QueryString["minPrice"]");
+        $('input[name="maxPrice"]').val("@Request.QueryString["maxPrice"]");
     });
 </script>

@@ -1,0 +1,43 @@
+﻿@model EcommerceClothShop.Models.Order
+@{
+    ViewBag.Title = "Order Confirmation";
+}
+
+<h2 class="text-center text-success mb-4">Order Placed Successfully!</h2>
+
+<p class="text-center">Thank you for your order. Your order ID is <strong>#@Model.OrderID</strong>.</p>
+
+<div class="card shadow-sm p-3 mb-4">
+    <h4>Order Details</h4>
+    <p><strong>Order Date:</strong> @(Model.CreatedAt != null ? Model.CreatedAt.Value.ToString("MMMM dd, yyyy HH:mm") : "N/A")</p>
+    <p><strong>Order Status:</strong> @Model.OrderStatus</p>
+    <p><strong>Total Amount:</strong> $@Model.TotalAmount</p>
+</div>
+
+<h4>Items Ordered</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>$@item.Price</td>
+                <td>@item.Quantity</td>
+                <td>$@(item.Price * item.Quantity)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p class="text-center">
+    <a href="@Url.Action("Index", "Shop")" class="btn btn-primary">Continue Shopping</a>
+    <a href="@Url.Action("OrderHistory", "Orders")" class="btn btn-secondary">View My Orders</a>
+</p>
