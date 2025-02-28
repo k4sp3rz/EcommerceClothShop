@@ -1,21 +1,22 @@
-﻿@model IEnumerable<EcommerceClothShop.Models.Product>
+﻿@model PagedList.IPagedList<EcommerceClothShop.Models.Product>
+@using PagedList.Mvc
 
 @{
     ViewBag.Title = "Shop Products";
 }
 
-<h2 class="mb-4 text-center">Our Products</h2>
+<h2 class="mb-4 text-center text-primary">🛍 Our Products</h2>
 
-<!-- 🔍 Search and Filters -->
-<form method="get" action="@Url.Action("Index", "Product")" class="mb-4">
-    <div class="row">
+<!-- 🔍 Search & Filters -->
+<form method="get" action="@Url.Action("Index", "Product")" class="mb-4 bg-light p-3 rounded shadow-sm">
+    <div class="row g-3">
         <div class="col-md-4">
-            <input type="text" name="search" class="form-control" placeholder="Search products..." value="@Request.QueryString["search"]">
+            <input type="text" name="search" class="form-control" placeholder="🔎 Search products..."
+                   value="@Request.QueryString["search"]" />
         </div>
-
         <div class="col-md-3">
-            <select name="categoryId" class="form-control">
-                <option value="">All Categories</option>
+            <select name="categoryId" class="form-select">
+                <option value="">📂 All Categories</option>
                 @foreach (var category in ViewBag.Categories)
                 {
                     <option value="@category.CategoryID" @(Request.QueryString["categoryId"] == category.CategoryID.ToString() ? "selected" : "")>
@@ -24,39 +25,47 @@
                 }
             </select>
         </div>
-
         <div class="col-md-2">
-            <input type="number" name="minPrice" class="form-control" placeholder="Min Price" value="@Request.QueryString["minPrice"]">
+            <input type="number" name="minPrice" class="form-control" placeholder="💲 Min Price"
+                   value="@Request.QueryString["minPrice"]" />
         </div>
-
         <div class="col-md-2">
-            <input type="number" name="maxPrice" class="form-control" placeholder="Max Price" value="@Request.QueryString["maxPrice"]">
+            <input type="number" name="maxPrice" class="form-control" placeholder="💲 Max Price"
+                   value="@Request.QueryString["maxPrice"]" />
         </div>
-
-        <div class="col-md-1">
-            <button type="submit" class="btn btn-primary">Search</button>
+        <div class="col-md-1 text-center">
+            <button type="submit" class="btn btn-primary w-100">🔍</button>
         </div>
     </div>
 </form>
 
-<!-- 🔹 Display Products -->
+<!-- 🔹 Product Grid -->
 <div class="row">
     @foreach (var product in Model)
     {
         <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="@product.ImageURL" class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+            <div class="card shadow-lg border-0 rounded-4 hover-effect">
+                <img src="@product.ImageURL" class="card-img-top rounded-top" alt="@product.Name"
+                     style="height: 250px; object-fit: cover;">
                 <div class="card-body">
-                    <h5 class="card-title">@product.Name</h5>
-                    <p class="card-text text-muted">
+                    <h5 class="card-title text-primary">@product.Name</h5>
+                    <p class="text-muted small">
                         @(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)
                     </p>
-                    <p class="font-weight-bold">$@product.Price</p>
-
-                    <div class="d-flex justify-content-between">
-                        <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" class="btn btn-primary">View Details</a>
-                        <button class="btn btn-success add-to-cart" data-product-id="@product.ProductID" data-product-name="@product.Name">Add to Cart</button>
-                    </div>
+                    <p class="fw-bold fs-5 text-success">$@product.Price</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-success add-to-cart"
+                            data-product-id="@product.ProductID"
+                            data-product-name="@product.Name">
+                        🛒 Add to Cart
+                    </button>
+                    <button class="btn btn-warning buy-now"
+                            data-product-id="@product.ProductID"
+                            data-product-name="@product.Name"
+                            data-product-price="@product.Price">
+                        ⚡ Buy Now
+                    </button>
                 </div>
             </div>
         </div>
@@ -65,13 +74,160 @@
 
 @if (!Model.Any())
 {
-    <p class="text-center text-danger">No products found.</p>
+    <p class="text-center text-danger fw-bold">❌ No products found.</p>
 }
+
+<!-- 🔹 Pagination -->
+<div class="text-center mt-4">
+    <div class="btn-group">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new
+        {
+            page,
+            search = Request.QueryString["search"],
+            categoryId = Request.QueryString["categoryId"],
+            minPrice = Request.QueryString["minPrice"],
+            maxPrice = Request.QueryString["maxPrice"]
+        }), new PagedListRenderOptions
+        {
+            LiElementClasses = new string[] { "page-item" },
+            UlElementClasses = new string[] { "pagination" },
+            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+            DisplayLinkToLastPage = PagedListDisplayMode.Always,
+            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+            DisplayLinkToNextPage = PagedListDisplayMode.Always
+        })
+    </div>
+</div>
+
+<!-- Modal for Add to Cart -->
+<div class="modal fade" id="quantityModal" tabindex="-1" aria-labelledby="quantityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quantityModalLabel">Select Quantity</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="addCartProductName"></p>
+                <label for="addCartQuantity">Quantity:</label>
+                <input type="number" id="addCartQuantity" class="form-control" min="1" value="1">
+                <input type="hidden" id="addCartProductId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmAddToCart">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Buy Now -->
+<div class="modal fade" id="buyNowModal" tabindex="-1" aria-labelledby="buyNowModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buyNowModalLabel">Buy Now - Select Quantity</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="buyNowProductName"></p>
+                <label for="buyNowQuantity">Quantity:</label>
+                <input type="number" id="buyNowQuantity" class="form-control" min="1" value="1">
+                <input type="hidden" id="buyNowProductId">
+                <input type="hidden" id="buyNowProductPrice">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmBuyNow">Buy Now</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
 <script>
     $(document).ready(function () {
-        // Ensure selected filters persist after submitting the form
-        $('select[name="categoryId"]').val("@Request.QueryString["categoryId"]");
-        $('input[name="minPrice"]').val("@Request.QueryString["minPrice"]");
-        $('input[name="maxPrice"]').val("@Request.QueryString["maxPrice"]");
+        // Add to Cart functionality
+        $(document).on("click", ".add-to-cart", function () {
+            var productId = $(this).data("product-id");
+            var productName = $(this).data("product-name");
+
+            $("#addCartProductName").text("Adding: " + productName);
+            $("#addCartProductId").val(productId);
+            $("#addCartQuantity").val(1); // Reset quantity to 1
+
+            $("#quantityModal").modal("show");
+        });
+
+        $("#confirmAddToCart").click(function () {
+            var productId = $("#addCartProductId").val();
+            var quantity = $("#addCartQuantity").val();
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: { id: productId, quantity: quantity },
+                success: function (response) {
+                    if (response.success) {
+                        alert("Product added to cart!");
+                        $("#cart-count").text(response.cartCount);
+                        $("#quantityModal").modal("hide");
+                    }
+                },
+                error: function () {
+                    alert("Error adding product to cart.");
+                }
+            });
+        });
+
+        // Buy Now functionality
+        $(document).on("click", ".buy-now", function () {
+            var productId = $(this).data("product-id");
+            var productName = $(this).data("product-name");
+            var productPrice = $(this).data("product-price");
+
+            $("#buyNowProductName").text("Buying: " + productName);
+            $("#buyNowProductId").val(productId);
+            $("#buyNowProductPrice").val(productPrice);
+            $("#buyNowQuantity").val(1); // Reset quantity to 1
+
+            $("#buyNowModal").modal("show");
+        });
+
+        // Updated Buy Now: add to cart then redirect to checkout
+        $(document).on("click", "#confirmBuyNow", function () {
+            var productId = $("#buyNowProductId").val();
+            var quantity = $("#buyNowQuantity").val();
+
+            if (quantity < 1) {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+
+            // First add the product to the cart
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: { id: productId, quantity: quantity },
+                success: function (response) {
+                    if (response.success) {
+                        // After successful addition, redirect to checkout
+                        window.location.href = '@Url.Action("Checkout", "Cart")';
+                    } else {
+                        alert("Error adding product to cart for Buy Now.");
+                    }
+                },
+                error: function () {
+                    alert("Error adding product to cart for Buy Now.");
+                }
+            });
+        });
     });
 </script>

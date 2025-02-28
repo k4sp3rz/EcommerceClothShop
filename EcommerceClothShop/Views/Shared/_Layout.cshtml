@@ -3,14 +3,74 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <title>@ViewBag.Title - Ecommerce Shop</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+
+    <!-- Custom Styles -->
+    <style>
+        /* Navbar */
+        .navbar {
+            padding: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .nav-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: color 0.3s ease-in-out;
+        }
+
+        /* Active tab styling */
+        .nav-item .nav-link.active {
+            background-color: #ffc107 !important;
+            color: black !important;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .nav-link:hover {
+            color: #ffc107 !important;
+        }
+
+        /* Cart Badge */
+        #cart-count {
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 50%;
+            min-width: 22px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 1rem;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            margin-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+    @{
+        string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        string currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    }
+
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
         <div class="container">
-            @Html.ActionLink("Ecommerce Shop", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            @Html.ActionLink("🛍 Ecommerce Shop", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     title="Toggle navigation" aria-controls="navbarNav"
                     aria-expanded="false" aria-label="Toggle navigation">
@@ -18,17 +78,29 @@
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item">@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li class="nav-item">@Html.ActionLink("Shop", "Index", "Product", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li class="nav-item">@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" href="@Url.Action("Index", "Home")">
+                            🏠 Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "Product" && currentAction == "Index" ? "active" : "")" href="@Url.Action("Index", "Product")">
+                            🛒 Shop
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(currentController == "Home" && currentAction == "Contact" ? "active" : "")" href="@Url.Action("Contact", "Home")">
+                            📞 Contact
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Right-aligned navbar items -->
                 <ul class="navbar-nav ms-auto">
-                    <!-- Cart is visible to all users -->
+                    <!-- Cart -->
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Cart")">
-                            Cart <span class="badge bg-danger" id="cart-count">
+                        <a class="nav-link @(currentController == "Cart" ? "active" : "")" href="@Url.Action("Index", "Cart")">
+                            🛍 Cart <span class="badge bg-danger" id="cart-count">
                                 @(Session["CartCount"] ?? "0")
                             </span>
                         </a>
@@ -38,19 +110,23 @@
                     {
                         <!-- User Account -->
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Details", "User")">Account (@Session["UserName"])</a>
+                            <a class="nav-link @(currentController == "User" ? "active" : "")" href="@Url.Action("Details", "User")">
+                                👤 @Session["UserName"]
+                            </a>
                         </li>
 
                         <!-- Logout -->
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Logout", "Auth")">Logout</a>
+                            <a class="nav-link" href="@Url.Action("Logout", "Auth")">🚪 Logout</a>
                         </li>
                     }
                     else
                     {
                         <!-- Login -->
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Login", "Auth")">Login</a>
+                            <a class="nav-link @(currentController == "Auth" && currentAction == "Login" ? "active" : "")" href="@Url.Action("Login", "Auth")">
+                                🔑 Login
+                            </a>
                         </li>
                     }
                 </ul>
@@ -62,7 +138,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - Ecommerce Shop</p>
+            <p>&copy; @DateTime.Now.Year - Ecommerce Shop | Powered by ASP.NET</p>
         </footer>
     </div>
 

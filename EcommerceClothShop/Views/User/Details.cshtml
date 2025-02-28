@@ -17,7 +17,10 @@
                 <p><strong>Email:</strong> @Model.Email</p>
                 <p><strong>Phone:</strong> @(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</p>
                 <p><strong>Address:</strong> @(string.IsNullOrEmpty(Model.Address) ? "Not provided" : Model.Address)</p>
-                <p><strong>Role:</strong> <span class="badge @(Model.Role == "admin" ? "bg-danger" : "bg-primary")">@Model.Role</span></p>
+                <p>
+                    <strong>Role:</strong>
+                    <span class="badge @(Model.Role == "admin" ? "bg-danger" : "bg-primary")">@Model.Role</span>
+                </p>
                 <p><strong>Member Since:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
             </div>
         </div>
@@ -25,14 +28,52 @@
     <a href="@Url.Action("Edit", "User", new { id = Model.UserID })" class="btn btn-warning">Edit Profile</a>
     @if (Session["UserRole"] != null && Session["UserRole"].ToString() == "admin")
     {
-            <a class="btn btn-warning" href="@Url.Action("Dashboard", "Admin")">Admin Dashboard</a>
+        <a class="btn btn-warning" href="@Url.Action("Dashboard", "Admin")">Admin Dashboard</a>
     }
     <hr />
 
-    <!-- User Orders -->
+    <!-- Recent Orders Section -->
     <h3>User Orders</h3>
-
+    @if (Model.Orders != null && Model.Orders.Any())
+    {
+        <div class="recent-orders">
+            <h4>Recent Orders</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.Orders.OrderByDescending(o => o.CreatedAt).Take(5))
+                    {
+                        <tr>
+                            <td>@order.OrderID</td>
+                            <td>@order.CreatedAt</td>
+                            <td>@order.OrderStatus</td>
+                            <td>@order.TotalAmount.ToString("C")</td>
+                            <td>
+                                <a href="@Url.Action("OrderDetails", "Orders", new { id = order.OrderID })" class="btn btn-info btn-sm">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <a href="@Url.Action("OrderHistory", "Orders")" class="btn btn-primary">See more</a>
+        </div>
+    }
+    else
+    {
+        <p>No orders found.</p>
+    }
 
     <!-- User Reviews -->
+    <!-- Add additional sections as needed -->
 
 </div>

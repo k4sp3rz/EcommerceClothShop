@@ -1,0 +1,130 @@
+﻿@model EcommerceClothShop.Models.Order
+
+@{
+    ViewBag.Title = "Invoice - Order #" + Model.OrderID;
+    Layout = null; // Using a standalone layout for printing; change if needed.
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Invoice - Order #@Model.OrderID</title>
+    <style type="text/css">
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            font-size: 16px;
+            line-height: 24px;
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-header h2 {
+            margin: 0;
+        }
+        .invoice-details {
+            margin-bottom: 20px;
+        }
+        .invoice-details table {
+            width: 100%;
+        }
+        .invoice-details table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+        .order-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .order-items th, .order-items td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .order-items th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        .total {
+            text-align: right;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        @@media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <div class="invoice-header">
+            <h2>Invoice</h2>
+            <p>Order #@Model.OrderID</p>
+            <p>Date: @Model.CreatedAt</p>
+        </div>
+
+        <div class="invoice-details">
+            <table>
+                <tr>
+                    <td>
+                        <strong>Billing Information:</strong><br />
+                        @* Assuming your Order model has a related User object *@
+                        @if (Model.User != null)
+                        {
+                            @Model.User.FullName <br />
+                            @Model.User.Email <br />
+                        }
+                    </td>
+                    <td>
+                        <strong>Shipping Address:</strong><br />
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <table class="order-items">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Description</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                    <th>Line Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderDetails)
+                {
+                    <tr>
+                        <td>@item.Product.Name</td>
+                        <td>@item.Product.Description</td>
+                        <td>@item.Product.Price.ToString("C")</td>
+                        <td>@item.Quantity</td>
+                        <td>@(item.Price * item.Quantity).ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="total">
+            <p>Total: @Model.TotalAmount.ToString("C")</p>
+        </div>
+
+        <div class="no-print">
+            <button onclick="window.print()">Print Invoice</button>
+        </div>
+    </div>
+</body>
+</html>

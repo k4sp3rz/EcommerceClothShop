@@ -3,67 +3,56 @@ using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
 using EcommerceClothShop.Models;
+using PagedList;
 
 namespace EcommerceClothShop.Controllers
 {
     public class ProductController : Controller
     {
-        private EcommerceClothShopEntities _context = new EcommerceClothShopEntities();
+        private readonly EcommerceClothShopEntities _context = new EcommerceClothShopEntities();
+        private const int PageSize = 12; // Number of products per page
 
-        public ActionResult Index(string search, int? categoryId, decimal? minPrice, decimal? maxPrice)
+        // 🏪 List Products with Search, Filter & Pagination
+        public ActionResult Index(string search, int? categoryId, decimal? minPrice, decimal? maxPrice, int page = 1)
         {
             var products = _context.Products.AsQueryable();
 
-            // 🔍 Filter by Search
+            // 🔍 Apply Filters
             if (!string.IsNullOrEmpty(search))
-            {
                 products = products.Where(p => p.Name.Contains(search));
-            }
 
-            // 📂 Filter by Category
-            if (categoryId.HasValue && categoryId.Value > 0)
-            {
+            if (categoryId.HasValue)
                 products = products.Where(p => p.CategoryID == categoryId.Value);
-            }
 
-            // 💲 Filter by Price Range
             if (minPrice.HasValue)
-            {
                 products = products.Where(p => p.Price >= minPrice.Value);
-            }
-            if (maxPrice.HasValue)
-            {
-                products = products.Where(p => p.Price <= maxPrice.Value);
-            }
 
-            // Fetch categories for dropdown
+            if (maxPrice.HasValue)
+                products = products.Where(p => p.Price <= maxPrice.Value);
+
             ViewBag.Categories = _context.Categories.ToList();
 
-            return View(products.ToList());
+            // 📄 Paginate Products
+            var paginatedProducts = products.OrderBy(p => p.ProductID).ToPagedList(page, PageSize);
+            return View(paginatedProducts);
         }
 
+        // 🛍 Product Details + Reviews
         public ActionResult Details(int id)
-    {
-        var product = _context.Products.FirstOrDefault(p => p.ProductID == id);
-        if (product == null)
         {
-            return HttpNotFound();
+            var product = _context.Products.FirstOrDefault(p => p.ProductID == id);
+            if (product == null) return HttpNotFound();
+
+            ViewBag.Reviews = _context.Reviews
+                .Where(r => r.ProductID == id)
+                .Include(r => r.User)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
+            return View(product);
         }
 
-        // Explicitly load User entity to avoid proxy issues
-        var reviews = _context.Reviews
-                              .Where(r => r.ProductID == id)
-                              .Include(r => r.User) // Ensure User data is included
-                              .OrderByDescending(r => r.CreatedAt)
-                              .ToList(); // Convert to a List before passing to ViewBag
-
-        ViewBag.Reviews = reviews; // Store the list in ViewBag
-
-        return View(product);
-    }
-
-
-
+        // ✍ Submit Product Review
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddReview(int productId, string reviewText, int rating)
@@ -84,31 +73,24 @@ namespace EcommerceClothShop.Controllers
             {
                 int userId = (int)Session["UserID"];
                 var user = _context.Users.Find(userId);
+                if (user == null) return RedirectToAction("Login", "Auth");
 
-                if (user == null)
-                {
-                    TempData["ErrorMessage"] = "User not found. Please log in again.";
-                    return RedirectToAction("Login", "Auth");
-                }
-
-                var review = new Review
+                _context.Reviews.Add(new Review
                 {
                     ProductID = productId,
                     UserID = user.UserID,
                     Comment = reviewText.Trim(),
                     Rating = rating,
                     CreatedAt = DateTime.Now
-                };
+                });
 
-                _context.Reviews.Add(review);
                 _context.SaveChanges();
-
                 TempData["SuccessMessage"] = "Review submitted successfully!";
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                TempData["ErrorMessage"] = "An error occurred while submitting your review. Please try again.";
+                TempData["ErrorMessage"] = "An error occurred while submitting your review.";
             }
 
             return RedirectToAction("Details", new { id = productId });
