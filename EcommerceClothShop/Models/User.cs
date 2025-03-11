@@ -7,8 +7,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System;
-using System.ComponentModel.DataAnnotations;
 namespace EcommerceClothShop.Models
 {
     using System;
@@ -23,27 +21,16 @@ namespace EcommerceClothShop.Models
             this.Orders = new HashSet<Order>();
             this.Reviews = new HashSet<Review>();
         }
-
-        [Key]
+    
         public int UserID { get; set; }
-
-        [Required]
         public string FullName { get; set; }
-
-        [Required, EmailAddress]
         public string Email { get; set; }
-
-        [Required]
-        public string PasswordHash { get; set; } // Store hashed password
-
+        public string PasswordHash { get; set; }
         public string Phone { get; set; }
         public string Address { get; set; }
-
-        [Required]
-        public string Role { get; set; } // "admin" or "customer"
-
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-
+        public string Role { get; set; }
+        public Nullable<System.DateTime> CreatedAt { get; set; }
+    
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cart> Carts { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

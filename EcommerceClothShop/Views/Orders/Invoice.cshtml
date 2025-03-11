@@ -110,16 +110,16 @@
                     <tr>
                         <td>@item.Product.Name</td>
                         <td>@item.Product.Description</td>
-                        <td>@item.Product.Price.ToString("C")</td>
+                        <td>@item.Product.Price</td>
                         <td>@item.Quantity</td>
-                        <td>@(item.Price * item.Quantity).ToString("C")</td>
+                        <td>@(item.Price * item.Quantity)</td>
                     </tr>
                 }
             </tbody>
         </table>
 
         <div class="total">
-            <p>Total: @Model.TotalAmount.ToString("C")</p>
+            <p>Total: @Model.TotalAmount</p>
         </div>
 
         <div class="no-print">

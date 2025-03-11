@@ -52,13 +52,13 @@ else
     <h4>Select Payment Method</h4>
     <form method="post" action="@Url.Action("PlaceOrder", "Cart")">
         <div class="form-group">
-            <label>
-                <input type="radio" name="paymentMethod" value="COD" checked> Cash on Delivery (COD)
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="paymentMethod" value="Online"> Online Payment
-            </label>
+            <select name="paymentMethod">
+                <option value="cod">Cash on Delivery</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="paypal">PayPal</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="vnpay">VNPay</option>
+            </select>
         </div>
 
         <button type="submit" class="btn btn-success btn-lg btn-block">Place Order</button>

@@ -1,33 +1,88 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿@model IEnumerable<EcommerceClothShop.Models.Product>
+
+@{
+    ViewBag.Title = "Home";
 }
-
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
-
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+<div class="container mt-4">
+    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="/images/banner1.jpg" class="d-block w-100" alt="Banner 1">
+            </div>
+            <div class="carousel-item">
+                <img src="/images/banner2.jpg" class="d-block w-100" alt="Banner 2">
+            </div>
+            <div class="carousel-item">
+                <img src="/images/banner3.jpg" class="d-block w-100" alt="Banner 3">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
-</main>
+
+    <div class="jumbotron text-center bg-light p-5 mt-4">
+        <h1>Welcome to ClothShop</h1>
+        <p>Find the latest fashion trends at the best prices.</p>
+        <a href="@Url.Action("Shop", "Product")" class="btn btn-primary">Shop Now</a>
+    </div>
+
+    <!-- Featured Products -->
+    <h2 class="mt-5">Featured Products</h2>
+    <div class="row">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var product in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="@product.ImageURL" class="card-img-top" alt="@product.Name">
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text">$@product.Price</p>
+                            <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No featured products available at the moment.</p>
+        }
+    </div>
+
+    <!-- Categories -->
+    <h2 class="mt-5">Shop by Category</h2>
+    <div class="row text-center">
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Product", new { category = "Men" })" class="btn btn-outline-dark">Men</a>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Product", new { category = "Women" })" class="btn btn-outline-dark">Women</a>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Product", new { category = "Kids" })" class="btn btn-outline-dark">Kids</a>
+        </div>
+        <div class="col-md-3">
+            <a href="@Url.Action("Index", "Product", new { category = "Accessories" })" class="btn btn-outline-dark">Accessories</a>
+        </div>
+    </div>
+
+    <!-- Promotions -->
+    <div class="mt-5 p-4 bg-warning text-center">
+        <h3>Exclusive Deals</h3>
+        <p>Get up to 50% off on selected items. Hurry, limited stock available!</p>
+        <a href="@Url.Action("Shop", "Product")" class="btn btn-dark">Shop Now</a>
+    </div>
+</div>

@@ -8,7 +8,7 @@
 <h2 class="mb-4 text-center text-primary">🛍 Our Products</h2>
 
 <!-- 🔍 Search & Filters -->
-<form method="get" action="@Url.Action("Index", "Product")" class="mb-4 bg-light p-3 rounded shadow-sm">
+<form method="get" action="@Url.Action("Index", "Product")" class="mb-4 search-form">
     <div class="row g-3">
         <div class="col-md-4">
             <input type="text" name="search" class="form-control" placeholder="🔎 Search products..."
@@ -44,9 +44,12 @@
     @foreach (var product in Model)
     {
         <div class="col-md-4 mb-4">
-            <div class="card shadow-lg border-0 rounded-4 hover-effect">
+
+            <div class="card shadow-sm border-0 rounded-4 hover-effect" >
+                <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" style="height: 250px">
                 <img src="@product.ImageURL" class="card-img-top rounded-top" alt="@product.Name"
                      style="height: 250px; object-fit: cover;">
+                    </a>
                 <div class="card-body">
                     <h5 class="card-title text-primary">@product.Name</h5>
                     <p class="text-muted small">
@@ -63,7 +66,7 @@
                     <button class="btn btn-warning buy-now"
                             data-product-id="@product.ProductID"
                             data-product-name="@product.Name"
-                            data-product-price="@product.Price">
+                            data-product-price="@product.Price">    
                         ⚡ Buy Now
                     </button>
                 </div>
@@ -81,21 +84,22 @@
 <div class="text-center mt-4">
     <div class="btn-group">
         @Html.PagedListPager(Model, page => Url.Action("Index", new
-        {
-            page,
-            search = Request.QueryString["search"],
-            categoryId = Request.QueryString["categoryId"],
-            minPrice = Request.QueryString["minPrice"],
-            maxPrice = Request.QueryString["maxPrice"]
-        }), new PagedListRenderOptions
-        {
-            LiElementClasses = new string[] { "page-item" },
-            UlElementClasses = new string[] { "pagination" },
-            DisplayLinkToFirstPage = PagedListDisplayMode.Always,
-            DisplayLinkToLastPage = PagedListDisplayMode.Always,
-            DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
-            DisplayLinkToNextPage = PagedListDisplayMode.Always
-        })
+               {
+                   page,
+                   search = Request.QueryString["search"],
+                   categoryId = Request.QueryString["categoryId"],
+                   minPrice = Request.QueryString["minPrice"],
+                   maxPrice = Request.QueryString["maxPrice"]
+               }), new PagedListRenderOptions
+               {
+                   LiElementClasses = new string[] { "page-item" },
+                   UlElementClasses = new string[] { "pagination", "justify-content-center" },
+                   DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                   DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                   DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                   DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                   ContainerDivClasses = new string[] { "mt-4" }
+               })
     </div>
 </div>
 
@@ -229,5 +233,72 @@
                 }
             });
         });
+
+        // Reset modal on hide
+        $(".modal").on("hidden.bs.modal", function () {
+            $(this).find("input[type='number']").val(1);
+        });
+
+        // Handle close button click
+        $(".modal .close, .modal .btn-secondary").click(function () {
+            $(this).closest(".modal").modal("hide");
+        });
     });
 </script>
+
+<!-- Custom Styles -->
+<style>
+    /* Search & Filter Form */
+    .search-form {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .search-form input[type="text"],
+        .search-form input[type="number"],
+        .search-form select {
+            border-radius: 0.25rem;
+            border: 1px solid #ced4da;
+        }
+
+    /* Product Card Hover Effect */
+    .card.hover-effect {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card.hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+    /* Pagination Styles */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+        .pagination .page-item a {
+            color: #007bff;
+            padding: 0.5rem 0.75rem;
+            text-decoration: none;
+            border: 1px solid #dee2e6;
+            margin: 0 2px;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+            .pagination .page-item a:hover {
+                background-color: #e9ecef;
+                
+            } 
+
+        .pagination .page-item.active a {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+</style>
