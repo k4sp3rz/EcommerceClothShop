@@ -15,7 +15,7 @@
 
         <!-- Product Information -->
         <div class="col-md-7">
-            <h4 class="text-success">Price: $@Model.Price</h4>
+            <h4 class="text-success">Price: @Model.Price.ToString("N0")đ</h4>
             <p><strong>Description:</strong> @Model.Description</p>
             <p><strong>Stock:</strong> @Model.Stock</p>
             <p><strong>Category:</strong> @(Model.Category != null ? Model.Category.CategoryName : "Uncategorized")</p>
@@ -172,3 +172,4 @@ $(document).ready(function () {
         <p><strong><a href="@Url.Action("Login", "Auth")">Log in</a> to write a review.</strong></p>
     }
 </div>
+

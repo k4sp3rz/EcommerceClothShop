@@ -13,16 +13,19 @@ namespace EcommerceClothShop.Controllers
     {
         private readonly EcommerceClothShopEntities db = new EcommerceClothShopEntities();
 
+        // Retrieve cart from session
         private List<CartItem> GetCart()
         {
             return Session["Cart"] as List<CartItem> ?? new List<CartItem>();
         }
 
+        // Display cart
         public ActionResult Index()
         {
             return View(GetCart());
         }
 
+        // Add item to cart
         [HttpPost]
         public JsonResult AddToCart(int id, int quantity)
         {
@@ -51,6 +54,7 @@ namespace EcommerceClothShop.Controllers
             return Json(new { success = true, cartCount = Session["CartCount"] });
         }
 
+        // Display checkout page
         public ActionResult Checkout()
         {
             if (Session["UserID"] == null)
@@ -68,6 +72,7 @@ namespace EcommerceClothShop.Controllers
             return View(cart);
         }
 
+        // Place order with random OrderID
         public ActionResult PlaceOrder(string paymentMethod)
         {
             var allowedMethods = new List<string> { "cod", "bank_transfer", "paypal", "credit_card", "vnpay" };
@@ -91,10 +96,12 @@ namespace EcommerceClothShop.Controllers
                 {
                     var order = new Order
                     {
+                        OrderID = GenerateRandomOrderId(), // Randomly generated OrderID
                         UserID = userId.Value,
                         TotalAmount = cart.Sum(item => item.Product.Price * item.Quantity),
                         OrderStatus = "Pending",
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.Now,
+                        PaymentMethod = paymentMethod
                     };
 
                     db.Orders.Add(order);
@@ -102,6 +109,12 @@ namespace EcommerceClothShop.Controllers
 
                     foreach (var item in cart)
                     {
+                        var product = db.Products.Find(item.Product.ProductID);
+                        if (product != null)
+                        {
+                            product.Stock -= item.Quantity;
+                        }
+
                         db.OrderDetails.Add(new OrderDetail
                         {
                             OrderID = order.OrderID,
@@ -132,6 +145,19 @@ namespace EcommerceClothShop.Controllers
             }
         }
 
+        // Generate a unique random OrderID
+        private int GenerateRandomOrderId()
+        {
+            Random random = new Random();
+            int orderId;
+            do
+            {
+                orderId = random.Next(100000, 999999); // 6-digit random number
+            } while (db.Orders.Any(o => o.OrderID == orderId)); // Ensure uniqueness
+            return orderId;
+        }
+
+        // Generate VNPay payment URL
         private string GenerateVNPayUrl(Order order)
         {
             string vnpUrl = ConfigurationManager.AppSettings["vnp_Url"];
@@ -153,12 +179,13 @@ namespace EcommerceClothShop.Controllers
             vnpay.AddRequestData("vnp_ReturnUrl", vnpReturnUrl);
             vnpay.AddRequestData("vnp_IpAddr", ipAddr);
 
-            // Time settings (VNPay requires specific format)
             string createDate = DateTime.Now.ToString("yyyyMMddHHmmss");
             vnpay.AddRequestData("vnp_CreateDate", createDate);
 
             return vnpay.CreateRequestUrl(vnpUrl, vnpHashSecret);
         }
+
+        // Handle VNPay return
         public ActionResult VNPayReturn()
         {
             string vnp_HashSecret = ConfigurationManager.AppSettings["vnp_HashSecret"];
@@ -179,20 +206,23 @@ namespace EcommerceClothShop.Controllers
             {
                 string responseCode = vnpay.GetResponseData("vnp_ResponseCode");
                 string transactionStatus = vnpay.GetResponseData("vnp_TransactionStatus");
-                int orderId = int.Parse(vnpay.GetResponseData("vnp_TxnRef"));
+                string txnRef = vnpay.GetResponseData("vnp_TxnRef");
 
                 if (responseCode == "00" && transactionStatus == "00")
                 {
-                    var order = db.Orders.Find(orderId);
-                    if (order != null)
+                    if (int.TryParse(txnRef, out int orderId))
                     {
-                        order.OrderStatus = "Paid";
-                        db.SaveChanges();
+                        var order = db.Orders.Find(orderId);
+                        if (order != null)
+                        {
+                            order.OrderStatus = "Paid";
+                            db.SaveChanges();
+                            Session["Cart"] = null;
+                            Session["CartCount"] = 0;
+                            return RedirectToAction("OrderConfirmation", new { orderId });
+                        }
                     }
-
-                    Session["Cart"] = null;
-                    Session["CartCount"] = 0;
-                    return RedirectToAction("OrderConfirmation", new { orderId });
+                    TempData["CheckoutError"] = "Invalid order reference.";
                 }
                 else
                 {
@@ -206,6 +236,7 @@ namespace EcommerceClothShop.Controllers
             return RedirectToAction("Checkout");
         }
 
+        // Display order confirmation
         public ActionResult OrderConfirmation(int orderId)
         {
             var order = db.Orders.Find(orderId);
@@ -215,6 +246,36 @@ namespace EcommerceClothShop.Controllers
             }
             return View(order);
         }
+        [HttpPost]
+        public JsonResult UpdateCart(int id, int quantity)
+        {
+            var cart = GetCart();
+            var cartItem = cart.FirstOrDefault(c => c.Product.ProductID == id);
+            var product = db.Products.Find(id);
+
+            if (cartItem != null && product != null)
+            {
+                if (quantity > product.Stock)
+                {
+                    return Json(new { success = false, message = "Not enough stock available." });
+                }
+
+                cartItem.Quantity = quantity;
+                Session["Cart"] = cart;
+                Session["CartCount"] = cart.Sum(c => c.Quantity);
+
+                return Json(new
+                {
+                    success = true,
+                    totalItemPrice = (cartItem.Product.Price * cartItem.Quantity).ToString("N0"),
+                    cartTotal = cart.Sum(c => c.Product.Price * c.Quantity).ToString("N0"),
+                    cartCount = Session["CartCount"]
+                });
+            }
+
+            return Json(new { success = false, message = "Product not found in cart." });
+        }
+
     }
 
     public class CartItem

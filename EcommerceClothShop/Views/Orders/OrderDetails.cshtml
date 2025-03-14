@@ -8,7 +8,7 @@
 
 <p><strong>Order Date:</strong> @Model.CreatedAt</p>
 <p><strong>Status:</strong> @Model.OrderStatus</p>
-<p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>
+<p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("N0")đ</p>
 
 <h3>Order Items</h3>
 <table class="table table-bordered">
@@ -26,8 +26,8 @@
             <tr>
                 <td>@item.Product.Name</td>
                 <td>@item.Quantity</td>
-                <td>@item.Price.ToString("C")</td>
-                <td>@((item.Quantity * item.Price).ToString("C"))</td>
+                <td>@item.Price.ToString("N0")đ</td>
+                <td>@((item.Quantity * item.Price).ToString("N0"))đ</td>
             </tr>
         }
     </tbody>

@@ -1,9 +1,14 @@
 ﻿@model EcommerceClothShop.Models.Order
 
 <h2>Order Confirmation</h2>
-<p>Thank you for your order, <strong>@Model.User.FullName</strong>!</p>
-<p>Order ID: <strong>@Model.OrderID</strong></p>
-<p>Total Amount: <strong>@Model.TotalAmount.ToString("C")</strong></p>
-<p>Payment Method: <strong>@Model.Payments.FirstOrDefault()?.PaymentMethod</strong></p>
-<p>Payment Status: <strong>@Model.Payments.FirstOrDefault()?.PaymentStatus</strong></p>
-<a href="@Url.Action("Index", "Shop")" class="btn btn-primary">Continue Shopping</a>
+
+<div class="order-summary">
+    <p>Thank you for your order, <strong>@Model.User.FullName</strong>!</p>
+    <p>Order ID: <strong>@Model.OrderID</strong></p>
+    <p>Total Amount: <span class="fw-bold fs-5 text-success">@Model.TotalAmount.ToString("N0")đ</span></p>
+
+    <p>Payment Method: <strong>@Model.PaymentMethod</strong></p>
+    <p>Payment Status: <strong>@(Model.OrderStatus ?? "Pending")</strong></p>
+</div>
+
+<a href="@Url.Action("Index", "Product")" class="btn btn-primary">Continue Shopping</a>

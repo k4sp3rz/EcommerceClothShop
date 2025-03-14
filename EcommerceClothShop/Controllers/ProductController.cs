@@ -15,7 +15,11 @@ namespace EcommerceClothShop.Controllers
         // 🏪 List Products with Search, Filter & Pagination
         public ActionResult Index(string search, int? categoryId, decimal? minPrice, decimal? maxPrice, int page = 1)
         {
-            var products = _context.Products.AsQueryable();
+            int PageSize = 10; // Set default page size
+
+            var products = _context.Products
+                .Where(p => !p.IsDeleted) // Exclude deleted products
+                .AsQueryable();
 
             // 🔍 Apply Filters
             if (!string.IsNullOrEmpty(search))
@@ -30,13 +34,14 @@ namespace EcommerceClothShop.Controllers
             if (maxPrice.HasValue)
                 products = products.Where(p => p.Price <= maxPrice.Value);
 
-            ViewBag.Categories = _context.Categories.ToList();
+            // 📄 Paginate Products (Ensure ordering before pagination)
+            var paginatedProducts = products
+                .OrderBy(p => p.ProductID) // Ensures stable sorting
+                .ToPagedList(page, PageSize);
 
-            // 📄 Paginate Products
-            var paginatedProducts = products.OrderBy(p => p.ProductID).ToPagedList(page, PageSize);
+            ViewBag.Categories = _context.Categories.ToList();
             return View(paginatedProducts);
         }
-
         // 🛍 Product Details + Reviews
         public ActionResult Details(int id)
         {

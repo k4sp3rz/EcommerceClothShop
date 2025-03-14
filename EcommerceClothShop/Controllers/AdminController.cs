@@ -22,11 +22,6 @@ namespace EcommerceClothShop.Controllers
 
         public ActionResult Dashboard()
         {
-            if (Session["UserRole"] == null || Session["UserRole"].ToString() != "admin")
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-
             var ordersPerMonth = db.Orders
                 .Where(o => o.CreatedAt.HasValue)
                 .GroupBy(o => new { o.CreatedAt.Value.Year, o.CreatedAt.Value.Month })
@@ -40,22 +35,68 @@ namespace EcommerceClothShop.Controllers
                 .ThenBy(g => g.Month)
                 .ToList();
 
-            // Prepare data for Chart.js
             ViewBag.Months = ordersPerMonth.Select(o => $"{o.Month}/{o.Year}").ToList();
             ViewBag.OrderCounts = ordersPerMonth.Select(o => o.OrderCount).ToList();
 
             return View();
         }
 
-
         public ActionResult Orders()
         {
-            // Retrieve orders from the database
-            var orders = db.Orders.ToList();
-
-            // Pass the orders to the view
+            var orders = db.Orders.OrderByDescending(o => o.CreatedAt).ToList();
             return View(orders);
         }
+
+        // 🔹 View Order Details
+        public ActionResult OrderDetails(int id)
+        {
+            var order = db.Orders
+                          .Include("OrderDetails.Product")  // Ensure Product is loaded
+                          .FirstOrDefault(o => o.OrderID == id);
+
+            if (order == null)
+            {
+                return HttpNotFound("Order not found.");
+            }
+
+            ViewBag.PaymentStatus = order.Payments?.FirstOrDefault()?.PaymentStatus ?? "Not Paid";
+            return View(order);
+        }
+
+        // 🔹 Update Order Status
+        [HttpPost]
+        public ActionResult UpdateOrderStatus(int id, string newStatus)
+        {
+            var order = db.Orders
+                          .Include("Payments")
+                          .FirstOrDefault(o => o.OrderID == id);
+
+            if (order == null)
+            {
+                return HttpNotFound("Order not found.");
+            }
+
+            order.OrderStatus = newStatus;
+
+            // 🔹 Update Payment Status if needed
+            var payment = db.Payments.FirstOrDefault(p => p.OrderID == order.OrderID);
+            if (payment != null)
+            {
+                if (newStatus == "Canceled" || newStatus == "Refunded")
+                {
+                    payment.PaymentStatus = "Refunded";
+                }
+                else if (newStatus == "Completed")
+                {
+                    payment.PaymentStatus = "Paid";
+                }
+            }
+
+            db.SaveChanges();
+            TempData["Message"] = "Order status updated successfully.";
+            return RedirectToAction("OrderDetails", new { id = order.OrderID });
+        }
+
         public ActionResult Stats()
         {
             var totalRevenue = db.Orders.Where(o => o.OrderStatus == "Completed").Sum(o => (decimal?)o.TotalAmount) ?? 0;

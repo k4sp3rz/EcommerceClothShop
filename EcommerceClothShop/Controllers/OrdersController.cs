@@ -1,8 +1,6 @@
 ﻿using EcommerceClothShop.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 
 namespace EcommerceClothShop.Controllers
@@ -36,6 +34,7 @@ namespace EcommerceClothShop.Controllers
 
             var order = db.Orders
                           .Include("OrderDetails.Product")
+                          .Include("Payments") // Load payment details
                           .FirstOrDefault(o => o.OrderID == id && o.UserID == userId);
 
             if (order == null)
@@ -44,12 +43,11 @@ namespace EcommerceClothShop.Controllers
             }
 
             ViewBag.OrderTotal = order.OrderDetails.Sum(od => od.Quantity * od.Product.Price);
-
             return View(order);
         }
 
         [HttpPost]
-        public ActionResult ConfirmOrder(int id)
+        public ActionResult ConfirmOrder(int id, string paymentMethod)
         {
             int? userId = Session["UserID"] as int?;
             if (userId == null)
@@ -77,7 +75,6 @@ namespace EcommerceClothShop.Controllers
             foreach (var detail in order.OrderDetails)
             {
                 var product = db.Products.Find(detail.ProductID);
-
                 if (product.Stock < detail.Quantity)
                 {
                     ModelState.AddModelError("", $"Insufficient stock for {product.Name}. Available: {product.Stock}");
@@ -86,7 +83,7 @@ namespace EcommerceClothShop.Controllers
                 }
             }
 
-            // Deduct Stock
+            // Deduct stock
             foreach (var detail in order.OrderDetails)
             {
                 var product = db.Products.Find(detail.ProductID);
@@ -95,14 +92,32 @@ namespace EcommerceClothShop.Controllers
 
             // Update Order Status
             order.OrderStatus = "Confirmed";
+
+            // Process Payment
+            var payment = db.Payments.FirstOrDefault(p => p.OrderID == order.OrderID);
+            if (payment == null)
+            {
+                payment = new Payment
+                {
+                    OrderID = order.OrderID,
+                    PaymentMethod = paymentMethod,
+                    PaymentStatus = "Paid",
+                    PaidAt = DateTime.Now
+                };
+                db.Payments.Add(payment);
+            }
+            else
+            {
+                payment.PaymentStatus = "Paid";
+                payment.PaidAt = DateTime.Now;
+            }
+
             db.SaveChanges();
 
-            TempData["Message"] = "Order confirmed and inventory updated.";
+            TempData["Message"] = "Order confirmed and payment recorded.";
             return RedirectToAction("OrderDetails", new { id = order.OrderID });
         }
 
-
-        // Invoice action that shows a printable/downloadable invoice view
         public ActionResult Invoice(int id)
         {
             int? userId = Session["UserID"] as int?;
@@ -111,9 +126,9 @@ namespace EcommerceClothShop.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            // Load order with order details and associated products
             var order = db.Orders
                           .Include("OrderDetails.Product")
+                          .Include("Payments") // Load payment details
                           .FirstOrDefault(o => o.OrderID == id && o.UserID == userId);
 
             if (order == null)
@@ -121,9 +136,7 @@ namespace EcommerceClothShop.Controllers
                 return HttpNotFound("Order not found.");
             }
 
-            // Calculate the total order amount based on quantity and price
             ViewBag.OrderTotal = order.OrderDetails.Sum(od => od.Quantity * od.Product.Price);
-
             return View("Invoice", order);
         }
 

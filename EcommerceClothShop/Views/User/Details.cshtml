@@ -55,7 +55,7 @@
                             <td>@order.OrderID</td>
                             <td>@order.CreatedAt</td>
                             <td>@order.OrderStatus</td>
-                            <td>@order.TotalAmount.ToString("C")</td>
+                            <td>@order.TotalAmount.ToString("N0")đ</td>
                             <td>
                                 <a href="@Url.Action("OrderDetails", "Orders", new { id = order.OrderID })" class="btn btn-info btn-sm">
                                     View

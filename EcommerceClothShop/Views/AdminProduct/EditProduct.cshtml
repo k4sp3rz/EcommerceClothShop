@@ -5,7 +5,7 @@
 
 <h2>Edit Product</h2>
 
-@using (Html.BeginForm("EditProduct", "ProductAdmin", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("EditProduct", "AdminProduct", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
     @Html.HiddenFor(m => m.ProductID)

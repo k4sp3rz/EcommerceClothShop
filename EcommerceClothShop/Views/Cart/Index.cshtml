@@ -28,12 +28,12 @@ else
             {
                 <tr data-product-id="@item.Product.ProductID">
                     <td>@item.Product.Name</td>
-                    <td>$@item.Product.Price</td>
+                    <td>@item.Product.Price.ToString("N0")đ</td>
                     <td>
                         <input type="number" min="1" class="form-control quantity-input"
                                value="@item.Quantity" data-id="@item.Product.ProductID" />
                     </td>
-                    <td class="total-price">$@(item.Product.Price * item.Quantity)</td>
+                    <td class="total-price">@((item.Product.Price * item.Quantity).ToString("N0"))đ</td>
                     <td>
                         <button class="btn btn-danger btn-remove" data-id="@item.Product.ProductID">Remove</button>
                     </td>
@@ -42,7 +42,7 @@ else
         </tbody>
     </table>
 
-    <h4>Total: <span id="cart-total">$@(Model.Sum(i => i.Product.Price * i.Quantity))</span></h4>
+    <h4>Total: <span id="cart-total">@(Model.Sum(i => i.Product.Price * i.Quantity).ToString("N0"))đ</span></h4>
 
     if (Session["UserID"] != null)
     {
@@ -57,37 +57,65 @@ else
 @section scripts {
     <script>
         $(document).ready(function () {
+            function updateCartDisplay(data) {
+                if (data.success) {
+                    let productRow = $("tr[data-product-id='" + data.productId + "']");
+                    productRow.find(".total-price").text(data.totalItemPrice + "đ");
+                    $("#cart-total").text(data.cartTotal + "đ");
+                    $("#cart-count").text(data.cartCount);
+                } else {
+                    alert(data.message);
+                }
+            }
+
             // Update Quantity
-            $(".quantity-input").change(function () {
-                var productId = $(this).data("id");
-                var quantity = $(this).val();
+            $(".quantity-input").on("change", function () {
+                let productId = $(this).data("id");
+                let quantity = $(this).val();
 
                 if (quantity < 1) {
-                    quantity = 1;
                     $(this).val(1);
+                    quantity = 1;
                 }
 
-                $.post("@Url.Action("UpdateCart", "Cart")", { id: productId, quantity: quantity }, function (data) {
-                    if (data.success) {
-                        $("tr[data-product-id='" + productId + "'] .total-price").text("$" + (quantity * data.total));
-                        $("#cart-total").text("$" + data.total);
-                        $("#cart-count").text(data.cartCount);
+                $.ajax({
+                    url: "@Url.Action("UpdateCart", "Cart")",
+                    type: "POST",
+                    data: { id: productId, quantity: quantity },
+                    success: function (data) {
+                        updateCartDisplay({ ...data, productId });
+                    },
+                    error: function () {
+                        alert("Error updating cart. Please try again.");
                     }
                 });
             });
 
-            // Remove Item
-            $(".btn-remove").click(function () {
-                var productId = $(this).data("id");
-                $.post("@Url.Action("RemoveFromCart", "Cart")", { id: productId }, function (data) {
-                    if (data.success) {
-                        $("tr[data-product-id='" + productId + "']").fadeOut(300, function () {
-                            $(this).remove();
-                            $("#cart-total").text("$" + data.total);
-                            $("#cart-count").text(data.cartCount);
-                        });
-                    }
-                });
+            // Remove Item with Confirmation
+            $(".btn-remove").on("click", function () {
+                let productId = $(this).data("id");
+
+                if (confirm("Are you sure you want to remove this item from the cart?")) {
+                    $.ajax({
+                        url: "@Url.Action("RemoveFromCart", "Cart")",
+                        type: "POST",
+                        data: { id: productId },
+                        success: function (data) {
+                            if (data.success) {
+                                $("tr[data-product-id='" + productId + "']").fadeOut(300, function () {
+                                    $(this).remove();
+                                    $("#cart-total").text(data.cartTotal + "đ");
+                                    $("#cart-count").text(data.cartCount);
+                                });
+                            } else {
+                                alert(data.message);
+                            }
+                        },
+                        error: function () {
+                            alert("Error removing item. Please try again.");
+                        }
+                    });
+                }
             });
         });
     </script>

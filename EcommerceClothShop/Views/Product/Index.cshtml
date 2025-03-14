@@ -55,7 +55,7 @@
                     <p class="text-muted small">
                         @(product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description)
                     </p>
-                    <p class="fw-bold fs-5 text-success">$@product.Price</p>
+                    <p class="fw-bold fs-5 text-success">@product.Price.ToString("N0")đ</p>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <button class="btn btn-success add-to-cart"

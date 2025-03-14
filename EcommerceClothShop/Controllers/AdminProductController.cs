@@ -22,7 +22,7 @@ public class AdminProductController : Controller
     // ✅ Manage Products
     public ActionResult ManageProducts()
     {
-        var products = _context.Products.ToList();
+        var products = _context.Products.Where(p => !p.IsDeleted).ToList(); 
         return View(products);
     }
 
@@ -101,26 +101,24 @@ public class AdminProductController : Controller
         return RedirectToAction("ManageProducts");
     }
 
-    public ActionResult DeleteProduct(int id)
+
+
+    // POST: Permanent Delete
+
+    [HttpPost]
+    public ActionResult Delete(int id)
     {
         var product = _context.Products.Find(id);
         if (product != null)
         {
-            // Delete product image file if exists
-            if (!string.IsNullOrEmpty(product.ImageURL))
-            {
-                string fullPath = Server.MapPath(product.ImageURL);
-                if (System.IO.File.Exists(fullPath))
-                {
-                    System.IO.File.Delete(fullPath);
-                }
-            }
-
-            _context.Products.Remove(product);
+            product.IsDeleted = true; // Mark as deleted
             _context.SaveChanges();
         }
 
-        TempData["SuccessMessage"] = "Product deleted successfully!";
+        TempData["SuccessMessage"] = "Product marked as deleted!";
         return RedirectToAction("ManageProducts");
     }
+
+
+
 }

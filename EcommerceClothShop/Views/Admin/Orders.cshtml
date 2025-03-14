@@ -6,14 +6,15 @@
 
 <h2>Manage Orders</h2>
 
-<table class="table">
-    <thead>
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
         <tr>
             <th>Order ID</th>
             <th>User ID</th>
             <th>Total Amount</th>
             <th>Order Status</th>
             <th>Created At</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -22,9 +23,17 @@
             <tr>
                 <td>@order.OrderID</td>
                 <td>@order.UserID</td>
-                <td>@order.TotalAmount</td>
-                <td>@order.OrderStatus</td>
+                <td>@order.TotalAmount.ToString("N0") đ</td>
+                <td>
+                    <span class="badge text-white @(order.OrderStatus == "Completed" ? "bg-success" : order.OrderStatus == "Pending" ? "bg-warning" : "bg-secondary")">
+                        @order.OrderStatus
+                    </span>
+                </td>
                 <td>@order.CreatedAt</td>
+                <td>
+                    <a href="@Url.Action("OrderDetails", new { id = order.OrderID })" class="btn btn-info btn-sm">View</a>
+                    <a href="@Url.Action("UpdateOrderStatus", new { id = order.OrderID })" class="btn btn-primary btn-sm">Update</a>
+                </td>
             </tr>
         }
     </tbody>

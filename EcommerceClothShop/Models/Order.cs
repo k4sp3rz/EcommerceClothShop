@@ -26,6 +26,7 @@ namespace EcommerceClothShop.Models
         public decimal TotalAmount { get; set; }
         public string OrderStatus { get; set; }
         public Nullable<System.DateTime> CreatedAt { get; set; }
+        public string PaymentMethod { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }

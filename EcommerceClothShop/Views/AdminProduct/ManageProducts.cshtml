@@ -28,13 +28,15 @@
                     <img src="@Url.Content(product.ImageURL)" alt="Product Image" width="50" height="50" />
                 </td>
                 <td>@product.Name</td>
-                <td>@product.Price.ToString("C")</td>
+                <td>@product.Price.ToString("N0")đ</td>
                 <td>@product.Stock</td>
                 <td>@(product.Category != null ? product.Category.CategoryName : "No Category")</td>
                 <td>
                     <a href="@Url.Action("EditProduct", new { id = product.ProductID })" class="btn btn-warning">Edit</a>
-                    <a href="@Url.Action("DeleteProduct", new { id = product.ProductID })" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
-                </td>
+                    <form action="@Url.Action("Delete", "AdminProduct", new { id = product.ProductID })" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?');">Delete</button>
+                    </form>                </td>
             </tr>
         }
     </tbody>

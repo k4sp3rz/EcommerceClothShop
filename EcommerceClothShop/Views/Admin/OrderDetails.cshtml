@@ -1,0 +1,33 @@
+﻿@model EcommerceClothShop.Models.Order
+
+@{
+    ViewBag.Title = "Order Details";
+}
+
+<h2>Order Details (ID: @Model.OrderID)</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.Product.Price.ToString("N0") đ</td>
+                <td>@(item.Quantity * item.Product.Price).ToString("N0") đ</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4>Total: @ViewBag.OrderTotal.ToString("N0") đ</h4>
+
+<a href="@Url.Action("Orders", "Admin")" class="btn btn-secondary">Back to Orders</a>

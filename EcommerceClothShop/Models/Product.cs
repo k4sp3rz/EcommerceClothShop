@@ -30,7 +30,8 @@ namespace EcommerceClothShop.Models
         public Nullable<int> CategoryID { get; set; }
         public string ImageURL { get; set; }
         public Nullable<System.DateTime> CreatedAt { get; set; }
-    
+        public bool IsDeleted { get; set; } = false;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual Category Category { get; set; }

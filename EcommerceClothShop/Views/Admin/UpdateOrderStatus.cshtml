@@ -1,0 +1,23 @@
+﻿@model EcommerceClothShop.Models.Order
+
+@{
+    ViewBag.Title = "Update Order Status";
+}
+
+<h2>Update Order Status (ID: @Model.OrderID)</h2>
+
+<form method="post" action="@Url.Action("UpdateOrderStatus", "Admin", new { id = Model.OrderID })">
+    <div class="form-group">
+        <label>Order Status</label>
+        <select name="OrderStatus" class="form-control">
+            <option value="Pending" @(Model.OrderStatus == "Pending" ? "selected" : "")>Pending</option>
+            <option value="Confirmed" @(Model.OrderStatus == "Confirmed" ? "selected" : "")>Confirmed</option>
+            <option value="Completed" @(Model.OrderStatus == "Completed" ? "selected" : "")>Completed</option>
+            <option value="Cancelled" @(Model.OrderStatus == "Cancelled" ? "selected" : "")>Cancelled</option>
+            <option value="Refunded" @(Model.OrderStatus == "Refunded" ? "selected" : "")>Refunded</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Status</button>
+    <a href="@Url.Action("Orders", "Admin")" class="btn btn-secondary">Cancel</a>
+</form>
