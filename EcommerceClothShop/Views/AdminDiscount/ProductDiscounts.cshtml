@@ -1,0 +1,41 @@
+﻿
+@{
+    ViewBag.Title = "ProductDiscounts";
+}
+
+<h2>ProductDiscounts</h2>
+
+@model IEnumerable<EcommerceClothShop.Models.ProductDiscount>
+@{
+    ViewBag.Title = "Manage Product Discounts";
+}
+
+<h2>Product Discounts</h2>
+<p>
+    <a href="@Url.Action("CreateProductDiscount")" class="btn btn-primary">Create New Product Discount</a>
+</p>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Product</th>
+        <th>Discount Amount</th>
+        <th>Is Percentage</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Product.Name</td>
+            <td>@item.DiscountAmount</td>
+            <td>@item.IsPercentage</td>
+            <td>@item.StartDate.ToShortDateString()</td>
+            <td>@item.EndDate.ToShortDateString()</td>
+            <td>
+                <a href="@Url.Action("EditProductDiscount", new { id = item.ProductDiscountID })" class="btn btn-sm btn-warning">Edit</a> |
+                <a href="@Url.Action("DeleteProductDiscount", new { id = item.ProductDiscountID })" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+    }
+</table>

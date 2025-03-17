@@ -22,7 +22,7 @@ public class AdminProductController : Controller
     // ✅ Manage Products
     public ActionResult ManageProducts()
     {
-        var products = _context.Products.Where(p => !p.IsDeleted).ToList(); 
+        var products = _context.Products.Where(p => p.IsDeleted != true).ToList();
         return View(products);
     }
 

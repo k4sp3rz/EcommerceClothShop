@@ -19,6 +19,7 @@ namespace EcommerceClothShop.Models
         {
             this.Carts = new HashSet<Cart>();
             this.OrderDetails = new HashSet<OrderDetail>();
+            this.ProductDiscounts = new HashSet<ProductDiscount>();
             this.Reviews = new HashSet<Review>();
         }
     
@@ -30,13 +31,15 @@ namespace EcommerceClothShop.Models
         public Nullable<int> CategoryID { get; set; }
         public string ImageURL { get; set; }
         public Nullable<System.DateTime> CreatedAt { get; set; }
-        public bool IsDeleted { get; set; } = false;
-
+        public Nullable<bool> IsDeleted { get; set; }
+    
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Cart> Carts { get; set; }
         public virtual Category Category { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ProductDiscount> ProductDiscounts { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Review> Reviews { get; set; }
     }

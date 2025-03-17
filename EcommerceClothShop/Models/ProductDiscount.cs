@@ -12,11 +12,15 @@ namespace EcommerceClothShop.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Discount
+    public partial class ProductDiscount
     {
-        public int DiscountID { get; set; }
-        public string Code { get; set; }
+        public int ProductDiscountID { get; set; }
+        public Nullable<int> ProductID { get; set; }
         public decimal DiscountAmount { get; set; }
-        public System.DateTime ExpiryDate { get; set; }
+        public bool IsPercentage { get; set; }
+        public System.DateTime StartDate { get; set; }
+        public System.DateTime EndDate { get; set; }
+    
+        public virtual Product Product { get; set; }
     }
 }

@@ -1,0 +1,39 @@
+﻿@model EcommerceClothShop.Models.DiscountPromo
+@{
+    ViewBag.Title = "Create Promo Code";
+}
+
+<h2>Create Promo Code</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Code)
+        @Html.EditorFor(model => model.Code, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.DiscountAmount)
+        @Html.EditorFor(model => model.DiscountAmount, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.IsPercentage)
+        @Html.CheckBoxFor(model => model.IsPercentage)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.MinOrderAmount)
+        @Html.EditorFor(model => model.MinOrderAmount, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ExpiryDate)
+        @Html.TextBoxFor(model => model.ExpiryDate, "{0:yyyy-MM-dd}", new { @type = "date", @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-success">Create</button>
+    <a href="@Url.Action("PromoIndex")" class="btn btn-secondary">Back</a>
+}

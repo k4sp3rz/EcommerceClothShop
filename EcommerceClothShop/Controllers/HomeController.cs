@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EcommerceClothShop.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,9 +9,16 @@ namespace EcommerceClothShop.Controllers
 {
     public class HomeController : Controller
     {
+        private EcommerceClothShopEntities db = new EcommerceClothShopEntities();
+
         public ActionResult Index()
         {
-            return View();
+            var products = db.Products
+                .Include("Category")
+                .Where(p => p.IsDeleted != true)
+                .ToList();
+
+            return View(products); // Now Model will not be null
         }
 
         public ActionResult About()

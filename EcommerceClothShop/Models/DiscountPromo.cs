@@ -12,29 +12,22 @@ namespace EcommerceClothShop.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Order
+    public partial class DiscountPromo
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Order()
+        public DiscountPromo()
         {
-            this.OrderDetails = new HashSet<OrderDetail>();
             this.OrderPromos = new HashSet<OrderPromo>();
-            this.Payments = new HashSet<Payment>();
         }
     
-        public int OrderID { get; set; }
-        public Nullable<int> UserID { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string OrderStatus { get; set; }
-        public Nullable<System.DateTime> CreatedAt { get; set; }
-        public string PaymentMethod { get; set; }
+        public int PromoID { get; set; }
+        public string Code { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public bool IsPercentage { get; set; }
+        public Nullable<decimal> MinOrderAmount { get; set; }
+        public System.DateTime ExpiryDate { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderPromo> OrderPromos { get; set; }
-        public virtual User User { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Payment> Payments { get; set; }
     }
 }

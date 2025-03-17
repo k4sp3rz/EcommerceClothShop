@@ -2,6 +2,21 @@
 @{
     ViewBag.Title = "Product Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var discount = Model.ProductDiscounts?.FirstOrDefault(d => d.StartDate <= DateTime.Now && d.EndDate >= DateTime.Now);
+    decimal discountedPrice = Model.Price;
+    if (discount != null)
+    {
+        if (discount.IsPercentage)
+        {
+            discountedPrice = Model.Price * (1 - (discount.DiscountAmount / 100));
+        }
+        else
+        {
+            discountedPrice = Model.Price - discount.DiscountAmount;
+        }
+        discountedPrice = discountedPrice < 0 ? 0 : discountedPrice;
+    }
 }
 
 <div class="container mt-4">
@@ -15,18 +30,43 @@
 
         <!-- Product Information -->
         <div class="col-md-7">
-            <h4 class="text-success">Price: @Model.Price.ToString("N0")đ</h4>
+            <!-- Pricing -->
+            <!-- Pricing -->
+            @if (discount != null)
+            {
+                <div class="d-flex align-items-center">
+                    <h4 class="mb-0">
+                        <span class="text-success font-weight-bold">@discountedPrice.ToString("N0")đ</span>
+                        <del class="text-muted ml-2">@Model.Price.ToString("N0")đ</del>
+                    </h4>
+                    @if (discount.IsPercentage)
+                    {
+                        <span class="badge bg-warning text-dark ml-3">-@discount.DiscountAmount% OFF</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark ml-3">-@discount.DiscountAmount.ToString("N0")đ</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <h4 class="text-success">@Model.Price.ToString("N0")đ</h4>
+            }
+
             <p><strong>Description:</strong> @Model.Description</p>
             <p><strong>Stock:</strong> @Model.Stock</p>
             <p><strong>Category:</strong> @(Model.Category != null ? Model.Category.CategoryName : "Uncategorized")</p>
 
-            <!-- Add to Cart Button -->
-            <div class="d-flex justify-content-between">
-                <button class="btn btn-success add-to-cart" data-product-id="@Model.ProductID" data-product-name="@Model.Name">Add to Cart</button>
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+                <button class="btn btn-success mr-2 add-to-cart" data-product-id="@Model.ProductID" data-product-name="@Model.Name">Add to Cart</button>
+                <button class="btn btn-warning buy-now" data-product-id="@Model.ProductID">Buy Now</button>
             </div>
         </div>
     </div>
-    <!-- Quantity Selection Modal -->
+
+    <!-- Quantity Modal -->
     <div class="modal fade" id="quantityModal" tabindex="-1" aria-labelledby="quantityModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -50,81 +90,27 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-    <script>
-$(document).ready(function () {
-    var selectedProductId;
-
-    $(".add-to-cart").click(function () {
-        selectedProductId = $(this).data("product-id");
-        var productName = $(this).data("product-name");
-
-        $("#product-name").text("Adding: " + productName);
-        $("#selected-product-id").val(selectedProductId);
-
-        // Reset quantity to 1 when a new product is selected
-        $("#quantity").val(1);
-
-        $("#quantityModal").modal("show");
-    });
-
-    $("#confirm-add-to-cart").click(function () {
-        var productId = $("#selected-product-id").val();
-        var quantity = $("#quantity").val();
-
-        $.ajax({
-            url: '@Url.Action("AddToCart", "Cart")',
-            type: 'POST',
-            data: { id: productId, quantity: quantity },
-            success: function (response) {
-                alert("Product added to cart!");
-                $("#cart-count").text(response.cartCount);
-                $("#quantityModal").modal("hide");
-            },
-            error: function () {
-                alert("Error adding product to cart.");
-            }
-        });
-    });
-
-    // 🔹 Close modal on Cancel button click
-    $(".btn-secondary").click(function () {
-        $("#quantityModal").modal("hide");
-    });
-
-    // 🔹 Close modal on "×" button click
-    $(".close").click(function () {
-        $("#quantityModal").modal("hide");
-    });
-});
-
-    </script>
-
-
-    <hr />
-
-    <!-- Success/Error Messages -->
+    <!-- Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        <div class="alert alert-success mt-3">@TempData["SuccessMessage"]</div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+        <div class="alert alert-danger mt-3">@TempData["ErrorMessage"]</div>
     }
 
-    <h3>Customer Reviews</h3>
+    <hr />
 
+    <!-- Reviews -->
+    <h3>Customer Reviews</h3>
     @if (ViewBag.Reviews != null && ViewBag.Reviews.Count > 0)
     {
         <ul class="list-group">
             @foreach (var review in ViewBag.Reviews)
             {
                 <li class="list-group-item">
-                    <strong>
-                        @(review.User != null ? review.User.FullName : "Unknown User")
-                    </strong>
+                    <strong>@(review.User != null ? review.User.FullName : "Unknown User")</strong>
                     <span class="text-warning">⭐ @review.Rating / 5</span>
                     <p>@review.Comment</p>
                     <small class="text-muted">@review.CreatedAt.ToString("MMMM dd, yyyy")</small>
@@ -139,7 +125,7 @@ $(document).ready(function () {
 
     <hr />
 
-    <!-- Review Form (Only for Logged-in Users) -->
+    <!-- Review Form -->
     @if (Session["UserID"] != null)
     {
         <h4>Write a Review</h4>
@@ -173,3 +159,42 @@ $(document).ready(function () {
     }
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+<script>
+$(document).ready(function () {
+    $(".add-to-cart").click(function () {
+        var productId = $(this).data("product-id");
+        var productName = $(this).data("product-name");
+
+        $("#product-name").text("Adding: " + productName);
+        $("#selected-product-id").val(productId);
+        $("#quantity").val(1);
+        $("#quantityModal").modal("show");
+    });
+
+    $("#confirm-add-to-cart").click(function () {
+        var productId = $("#selected-product-id").val();
+        var quantity = $("#quantity").val();
+
+        $.ajax({
+            url: '@Url.Action("AddToCart", "Cart")',
+            type: 'POST',
+            data: { id: productId, quantity: quantity },
+            success: function (response) {
+                alert("Product added to cart!");
+                $("#cart-count").text(response.cartCount);
+                $("#quantityModal").modal("hide");
+            },
+            error: function () {
+                alert("Error adding product to cart.");
+            }
+        });
+    });
+
+    $(".buy-now").click(function () {
+        var productId = $(this).data("product-id");
+        window.location.href = '@Url.Action("Checkout", "Order")' + '?productId=' + productId + '&quantity=1';
+    });
+});
+</script>

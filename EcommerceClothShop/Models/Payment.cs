@@ -15,7 +15,7 @@ namespace EcommerceClothShop.Models
     public partial class Payment
     {
         public int PaymentID { get; set; }
-        public int OrderID { get; set; }
+        public Nullable<int> OrderID { get; set; }
         public string PaymentMethod { get; set; }
         public string PaymentStatus { get; set; }
         public Nullable<System.DateTime> PaidAt { get; set; }

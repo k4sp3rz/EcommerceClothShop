@@ -18,7 +18,7 @@ namespace EcommerceClothShop.Controllers
             int PageSize = 10; // Set default page size
 
             var products = _context.Products
-                .Where(p => !p.IsDeleted) // Exclude deleted products
+                .Where(p => (bool)!p.IsDeleted) // Exclude deleted products
                 .AsQueryable();
 
             // 🔍 Apply Filters
@@ -45,12 +45,22 @@ namespace EcommerceClothShop.Controllers
         // 🛍 Product Details + Reviews
         public ActionResult Details(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductID == id);
-            if (product == null) return HttpNotFound();
+            var product = _context.Products.Include("Category").FirstOrDefault(p => p.ProductID == id);
+            if (product == null)
+            {
+                return HttpNotFound();
+            }
 
+            // Check for product discount
+            var productDiscount = _context.ProductDiscounts
+                .FirstOrDefault(d => d.ProductID == id && d.StartDate <= DateTime.Now && d.EndDate >= DateTime.Now);
+
+            ViewBag.ProductDiscount = productDiscount;
+
+            // Optional: Load reviews
             ViewBag.Reviews = _context.Reviews
+                .Include("User")
                 .Where(r => r.ProductID == id)
-                .Include(r => r.User)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
 

@@ -1,67 +1,87 @@
-﻿
-@model List<EcommerceClothShop.Controllers.CartItem>
+﻿@model List<EcommerceClothShop.Controllers.CartItem>
 
 @{
     ViewBag.Title = "Shopping Cart";
 }
 
-<h2>Shopping Cart</h2>
+<h2 class="mb-4">Shopping Cart</h2>
 
 @if (Model.Count == 0)
 {
-    <p>Your cart is empty. <a href="@Url.Action("Index", "Product")">Continue Shopping</a></p>
+    <div class="text-center py-5">
+        <p class="lead">Your cart is empty.</p>
+        <a href="@Url.Action("Index", "Product")" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Continue Shopping
+        </a>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr data-product-id="@item.Product.ProductID">
-                    <td>@item.Product.Name</td>
-                    <td>@item.Product.Price.ToString("N0")đ</td>
-                    <td>
-                        <input type="number" min="1" class="form-control quantity-input"
-                               value="@item.Quantity" data-id="@item.Product.ProductID" />
-                    </td>
-                    <td class="total-price">@((item.Product.Price * item.Quantity).ToString("N0"))đ</td>
-                    <td>
-                        <button class="btn btn-danger btn-remove" data-id="@item.Product.ProductID">Remove</button>
-                    </td>
+    <div class="table-responsive">
+        <table class="table table-bordered shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th style="width:120px;">Quantity</th>
+                    <th>Total</th>
+                    <th style="width:100px;">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr data-product-id="@item.Product.ProductID">
+                        <td class="align-middle">@item.Product.Name</td>
+                        <td class="align-middle">@item.Product.Price.ToString("N0")đ</td>
+                        <td class="align-middle">
+                            <input type="number" min="1" class="form-control form-control-sm quantity-input rounded"
+                                   value="@item.Quantity" data-id="@item.Product.ProductID" />
+                        </td>
+                        <td class="align-middle total-price">@((item.Product.Price * item.Quantity).ToString("N0"))đ</td>
+                        <td class="align-middle text-center">
+                            <button class="btn btn-sm btn-outline-danger btn-remove rounded" data-id="@item.Product.ProductID">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-    <h4>Total: <span id="cart-total">@(Model.Sum(i => i.Product.Price * i.Quantity).ToString("N0"))đ</span></h4>
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h4 class="fw-bold">Total: <span id="cart-total" class="text-primary">@(Model.Sum(i => i.Product.Price * i.Quantity).ToString("N0"))đ</span></h4>
 
-    if (Session["UserID"] != null)
-    {
-        <a href="@Url.Action("Checkout", "Cart")" class="btn btn-success">Proceed to Checkout</a>
-    }
-    else
-    {
-        <a href="@Url.Action("Login", "Auth")" class="btn btn-primary">Login to Checkout</a>
-    }
+        @if (Session["UserID"] != null)
+        {
+            <a href="@Url.Action("Checkout", "Cart")" class="btn btn-success btn-lg rounded-pill px-4">
+                <i class="bi bi-credit-card"></i> Proceed to Checkout
+            </a>
+        }
+        else
+        {
+            <a href="@Url.Action("Login", "Auth")" class="btn btn-primary btn-lg rounded-pill px-4">
+                <i class="bi bi-box-arrow-in-right"></i> Login to Checkout
+            </a>
+        }
+    </div>
 }
 
 @section scripts {
     <script>
         $(document).ready(function () {
+
+            // Format number with comma and currency symbol
+            function formatCurrency(amount) {
+                return Number(amount).toLocaleString() + "đ";
+            }
+
             function updateCartDisplay(data) {
                 if (data.success) {
                     let productRow = $("tr[data-product-id='" + data.productId + "']");
-                    productRow.find(".total-price").text(data.totalItemPrice + "đ");
-                    $("#cart-total").text(data.cartTotal + "đ");
+                    productRow.find(".total-price").text(formatCurrency(data.totalItemPrice));
+                    $("#cart-total").text(formatCurrency(data.cartTotal));
                     $("#cart-count").text(data.cartCount);
                 } else {
                     alert(data.message);
@@ -71,9 +91,9 @@ else
             // Update Quantity
             $(".quantity-input").on("change", function () {
                 let productId = $(this).data("id");
-                let quantity = $(this).val();
+                let quantity = parseInt($(this).val());
 
-                if (quantity < 1) {
+                if (quantity < 1 || isNaN(quantity)) {
                     $(this).val(1);
                     quantity = 1;
                 }
@@ -104,7 +124,7 @@ else
                             if (data.success) {
                                 $("tr[data-product-id='" + productId + "']").fadeOut(300, function () {
                                     $(this).remove();
-                                    $("#cart-total").text(data.cartTotal + "đ");
+                                    $("#cart-total").text(formatCurrency(data.cartTotal));
                                     $("#cart-count").text(data.cartCount);
                                 });
                             } else {

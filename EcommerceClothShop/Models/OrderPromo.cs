@@ -12,15 +12,13 @@ namespace EcommerceClothShop.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Cart
+    public partial class OrderPromo
     {
-        public int CartID { get; set; }
-        public Nullable<int> UserID { get; set; }
-        public Nullable<int> ProductID { get; set; }
-        public int Quantity { get; set; }
-        public Nullable<System.DateTime> AddedAt { get; set; }
+        public int OrderPromoID { get; set; }
+        public Nullable<int> OrderID { get; set; }
+        public Nullable<int> PromoID { get; set; }
     
-        public virtual Product Product { get; set; }
-        public virtual User User { get; set; }
+        public virtual DiscountPromo DiscountPromo { get; set; }
+        public virtual Order Order { get; set; }
     }
 }

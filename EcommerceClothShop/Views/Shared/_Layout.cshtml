@@ -7,60 +7,101 @@
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <!-- Custom Styles -->
     <style>
-        /* Navbar */
-        .navbar {
-            padding: 15px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff;
+        color: #1A1A1A;
+    }
 
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white !important;
-        }
+    /* Sticky Navbar */
+    .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+        padding: 12px 20px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+        background: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+    }
 
-        .nav-link {
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: color 0.3s ease-in-out;
-        }
+    .navbar-brand {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #1A1A1A !important;
+        letter-spacing: 1px;
+    }
 
-        /* Active tab styling */
-        .nav-item .nav-link.active {
-            background-color: #ffc107 !important;
-            color: black !important;
-            border-radius: 5px;
-            font-weight: bold;
-        }
+    .nav-link {
+        font-size: 1.05rem;
+        font-weight: 500;
+        color: #1A1A1A !important;
+        transition: all 0.3s ease;
+        padding: 8px 15px;
+        position: relative;
+    }
 
-        .nav-link:hover {
-            color: #ffc107 !important;
-        }
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10px;
+        right: 10px;
+        height: 2px;
+        background: #00BFFF;
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+        transform-origin: center;
+    }
 
-        /* Cart Badge */
-        #cart-count {
-            font-size: 0.9rem;
-            font-weight: bold;
-            padding: 4px 8px;
-            border-radius: 50%;
-            min-width: 22px;
-            display: inline-block;
-            text-align: center;
-        }
+    .nav-link:hover::after {
+        transform: scaleX(1);
+    }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 1rem;
-            background-color: #f8f9fa;
-            color: #6c757d;
-            margin-top: 30px;
-            border-top: 2px solid #e0e0e0;
-        }
+    .nav-link:hover {
+        color: #00BFFF !important;
+    }
+
+    .nav-item .nav-link.active {
+        color: #00BFFF !important;
+        font-weight: bold;
+    }
+
+    /* Cart Badge */
+    #cart-count {
+        font-size: 0.8rem;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 50%;
+        background-color: #00BFFF;
+        color: #ffffff;
+        margin-left: 5px;
+    }
+
+    /* Footer */
+    footer {
+        text-align: center;
+        padding: 20px 0;
+        font-size: 1rem;
+        background-color: #ffffff;
+        color: #1A1A1A;
+        margin-top: 40px;
+        border-top: 2px solid #e0e0e0;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+
+    .nav-link, .navbar-brand, footer {
+        transition: all 0.3s ease-in-out;
+    }
     </style>
+
+
+
 </head>
 <body>
     @{
@@ -68,64 +109,59 @@
         string currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     }
 
-    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-sm navbar-dark">
         <div class="container">
-            @Html.ActionLink("🛍 Ecommerce Shop", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            @Html.ActionLink("Ecommerce Shop", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    title="Toggle navigation" aria-controls="navbarNav"
-                    aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")" href="@Url.Action("Index", "Home")">
-                            🏠 Home
+                            Home
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "Product" && currentAction == "Index" ? "active" : "")" href="@Url.Action("Index", "Product")">
-                            🛒 Shop
+                            Shop
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "Home" && currentAction == "Contact" ? "active" : "")" href="@Url.Action("Contact", "Home")">
-                            📞 Contact
+                            Contact
                         </a>
                     </li>
                 </ul>
 
-                <!-- Right-aligned navbar items -->
                 <ul class="navbar-nav ms-auto">
-                    <!-- Cart -->
                     <li class="nav-item">
                         <a class="nav-link @(currentController == "Cart" ? "active" : "")" href="@Url.Action("Index", "Cart")">
-                            🛍 Cart <span class="badge bg-danger" id="cart-count">
-                                @(Session["CartCount"] ?? "0")
-                            </span>
+                            <i class="bi bi-bag"></i> Cart
+                            <span id="cart-count">@(Session["CartCount"] ?? "0")</span>
                         </a>
                     </li>
 
                     @if (Session["UserName"] != null)
                     {
-                        <!-- User Account -->
                         <li class="nav-item">
                             <a class="nav-link @(currentController == "User" ? "active" : "")" href="@Url.Action("Details", "User")">
-                                👤 @Session["UserName"]
+                                <i class="bi bi-person-circle"></i> @Session["UserName"]
                             </a>
                         </li>
-
-                        <!-- Logout -->
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Logout", "Auth")">🚪 Logout</a>
+                            <a class="nav-link" href="@Url.Action("Logout", "Auth")">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
                         </li>
                     }
                     else
                     {
-                        <!-- Login -->
                         <li class="nav-item">
                             <a class="nav-link @(currentController == "Auth" && currentAction == "Login" ? "active" : "")" href="@Url.Action("Login", "Auth")">
-                                🔑 Login
+                                <i class="bi bi-box-arrow-in-right"></i> Login
                             </a>
                         </li>
                     }
@@ -138,7 +174,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - Ecommerce Shop | Powered by ASP.NET</p>
+            <p>&copy; @DateTime.Now.Year - Ecommerce Shop | Powered by <strong>ASP.NET</strong></p>
         </footer>
     </div>
 

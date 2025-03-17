@@ -1,0 +1,33 @@
+﻿@model EcommerceClothShop.Models.ProductDiscount
+@{
+    ViewBag.Title = "Delete Product Discount";
+}
+
+<h2>Are you sure you want to delete this Product Discount?</h2>
+
+<div class="card p-3">
+    <dl class="row">
+        <dt class="col-sm-3">Product</dt>
+        <dd class="col-sm-9">@Model.Product.Name</dd>
+
+        <dt class="col-sm-3">Discount Amount</dt>
+        <dd class="col-sm-9">@Model.DiscountAmount</dd>
+
+        <dt class="col-sm-3">Is Percentage</dt>
+        <dd class="col-sm-9">@Model.IsPercentage</dd>
+
+        <dt class="col-sm-3">Valid From</dt>
+        <dd class="col-sm-9">@Model.StartDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-3">Valid To</dt>
+        <dd class="col-sm-9">@Model.EndDate.ToShortDateString()</dd>
+    </dl>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.ProductDiscountID)
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="@Url.Action("ProductDiscount")" class="btn btn-secondary">Cancel</a>
+    }
+</div>

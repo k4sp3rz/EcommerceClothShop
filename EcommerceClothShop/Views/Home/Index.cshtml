@@ -2,87 +2,208 @@
 
 @{
     ViewBag.Title = "Home";
+
+    var categories = Model != null
+        ? Model.Where(p => p.Category != null)
+               .Select(p => p.Category.CategoryName)
+               .Distinct()
+        : Enumerable.Empty<string>();
 }
-<div class="container mt-4">
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="/images/banner1.jpg" class="d-block w-100" alt="Banner 1">
-            </div>
-            <div class="carousel-item">
-                <img src="/images/banner2.jpg" class="d-block w-100" alt="Banner 2">
-            </div>
-            <div class="carousel-item">
-                <img src="/images/banner3.jpg" class="d-block w-100" alt="Banner 3">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
 
-    <div class="jumbotron text-center bg-light p-5 mt-4">
-        <h1>Welcome to ClothShop</h1>
-        <p>Find the latest fashion trends at the best prices.</p>
-        <a href="@Url.Action("Shop", "Product")" class="btn btn-primary">Shop Now</a>
-    </div>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Featured Products -->
-    <h2 class="mt-5">Featured Products</h2>
-    <div class="row">
-        @if (Model != null && Model.Any())
+<!-- MAIN Banner Carousel -->
+<div id="mainCarousel" class="carousel slide mb-5 shadow rounded-4 overflow-hidden" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="~/Content/HomeImages/banner1.png" class="d-block w-100" style="max-height: 500px; object-fit: cover;" alt="Banner 1">
+        </div>
+        <div class="carousel-item">
+            <img src="~/Content/HomeImages/banner2.jpg" class="d-block w-100" style="max-height: 500px; object-fit: cover;" alt="Banner 2">
+        </div>
+        <div class="carousel-item">
+            <img src="~/Content/HomeImages/banner3.jpg" class="d-block w-100" style="max-height: 500px; object-fit: cover;" alt="Banner 3">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<div class="container">
+
+    @if (categories.Any())
+    {
+        foreach (var categoryName in categories)
         {
-            foreach (var product in Model)
-            {
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="@product.ImageURL" class="card-img-top" alt="@product.Name">
-                        <div class="card-body">
-                            <h5 class="card-title">@product.Name</h5>
-                            <p class="card-text">$@product.Price</p>
-                            <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" class="btn btn-primary">View Details</a>
-                        </div>
+            <div class="category-section mb-5">
+                <h2 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold">@categoryName</span>
+                    <a href="@Url.Action("Index", "Product", new { category = categoryName })" class="btn btn-sm btn-outline-dark rounded-pill">See All</a>
+                </h2>
+
+                <div class="product-carousel-wrapper position-relative">
+                    <!-- Left Button -->
+                    <button class="carousel-btn left-btn" type="button" onclick="scrollCarousel(this, -1)">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <!-- Product Carousel -->
+                    <div class="product-carousel d-flex overflow-auto" style="gap: 1.5rem;">
+                        @foreach (var product in Model.Where(p => p.Category.CategoryName == categoryName).Take(6))
+                        {
+                            var discount = product.ProductDiscounts?.FirstOrDefault(d =>
+                                d.StartDate <= DateTime.Now &&
+                                d.EndDate >= DateTime.Now);
+
+                            decimal? discountedPrice = null;
+                            if (discount != null)
+                            {
+                                discountedPrice = discount.IsPercentage
+                                    ? product.Price * (1 - discount.DiscountAmount / 100)
+                                    : product.Price - discount.DiscountAmount;
+                            }
+
+                            <div class="card product-card border-0 rounded-4 overflow-hidden">
+                                <a href="@Url.Action("Details", "Product", new { id = product.ProductID })" class="position-relative">
+                                    <img src="@product.ImageURL" class="card-img-top" alt="@product.Name">
+
+                                    @if (discount != null)
+                                    {
+                                        <div class="discount-ribbon">
+                                            @(discount.IsPercentage ? $"{discount.DiscountAmount}% OFF" : $"-{discount.DiscountAmount.ToString("N0")}đ")
+                                        </div>
+                                    }
+                                </a>
+                                <div class="card-body px-2 d-flex flex-column justify-content-between">
+                                    <h6 class="fw-semibold text-truncate mb-1" title="@product.Name">@product.Name</h6>
+
+                                    @if (discountedPrice != null && discountedPrice > 0)
+                                    {
+                                        <div>
+                                            <span class="text-danger fw-bold">@discountedPrice.Value.ToString("N0")đ</span>
+                                            <del class="text-muted ms-2 small">@product.Price.ToString("N0")đ</del>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-success fw-semibold">@product.Price.ToString("N0")đ</p>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
-                </div>
-            }
-        }
-        else
-        {
-            <p>No featured products available at the moment.</p>
-        }
-    </div>
 
-    <!-- Categories -->
-    <h2 class="mt-5">Shop by Category</h2>
-    <div class="row text-center">
-        <div class="col-md-3">
-            <a href="@Url.Action("Index", "Product", new { category = "Men" })" class="btn btn-outline-dark">Men</a>
-        </div>
-        <div class="col-md-3">
-            <a href="@Url.Action("Index", "Product", new { category = "Women" })" class="btn btn-outline-dark">Women</a>
-        </div>
-        <div class="col-md-3">
-            <a href="@Url.Action("Index", "Product", new { category = "Kids" })" class="btn btn-outline-dark">Kids</a>
-        </div>
-        <div class="col-md-3">
-            <a href="@Url.Action("Index", "Product", new { category = "Accessories" })" class="btn btn-outline-dark">Accessories</a>
-        </div>
-    </div>
+                    <!-- Right Button -->
+                    <button class="carousel-btn right-btn" type="button" onclick="scrollCarousel(this, 1)">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">No products available at the moment.</p>
+    }
 
     <!-- Promotions -->
-    <div class="mt-5 p-4 bg-warning text-center">
-        <h3>Exclusive Deals</h3>
-        <p>Get up to 50% off on selected items. Hurry, limited stock available!</p>
-        <a href="@Url.Action("Shop", "Product")" class="btn btn-dark">Shop Now</a>
+    <div class="mt-5 p-5 bg-warning bg-gradient text-center rounded-4 shadow">
+        <h3 class="fw-bold mb-3">🎉 Exclusive Deals</h3>
+        <p class="lead mb-4">Get up to <strong>50% off</strong> on selected items. Hurry, limited stock available!</p>
+        <a href="@Url.Action("Index", "Product")" class="btn btn-dark rounded-pill px-4 py-2">Shop Now</a>
     </div>
 </div>
+
+<!-- Carousel CSS -->
+<style>
+    .product-carousel-wrapper {
+        position: relative;
+    }
+
+    .product-carousel {
+        scroll-snap-type: x mandatory;
+        padding-bottom: 10px;
+        scrollbar-width: none;
+    }
+
+    .product-carousel::-webkit-scrollbar {
+        display: none;
+    }
+
+    .product-card {
+        flex: 0 0 calc(20% - 1rem);
+        scroll-snap-align: start;
+        transition: transform 0.3s ease;
+        background: #fff;
+        min-width: 200px;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-card img {
+        height: 220px;
+        object-fit: cover;
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 50%;
+        padding: 0.5rem;
+        cursor: pointer;
+        z-index: 10;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .carousel-btn:hover {
+        background: #f1f1f1;
+    }
+
+    .left-btn {
+        left: -20px;
+    }
+
+    .right-btn {
+        right: -20px;
+    }
+
+    .carousel-btn i {
+        font-size: 1.4rem;
+    }
+
+    .discount-ribbon {
+        position: absolute;
+        top: 10px;
+        left: -5px;
+        background: #e63946;
+        color: #fff;
+        font-size: 0.75rem;
+        padding: 5px 12px;
+        transform: rotate(-15deg);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        font-weight: bold;
+    }
+
+
+</style>
+
+<!-- Carousel Scroll Script -->
+<script>
+    function scrollCarousel(btn, direction) {
+        const carousel = btn.parentElement.querySelector('.product-carousel');
+        carousel.scrollBy({ left: direction * 300, behavior: 'smooth' });
+    }
+</script>
+

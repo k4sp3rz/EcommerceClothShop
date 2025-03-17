@@ -1,0 +1,41 @@
+﻿@model EcommerceClothShop.Models.ProductDiscount
+@{
+    ViewBag.Title = "Edit Product Discount";
+}
+
+<h2>Edit Product Discount</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.HiddenFor(model => model.ProductDiscountID)
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.ProductID)
+        @Html.DropDownList("ProductID", null, "Select Product", new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.DiscountAmount)
+        @Html.EditorFor(model => model.DiscountAmount, new { htmlAttributes = new { @class = "form-control" } })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.IsPercentage)
+        @Html.CheckBoxFor(model => model.IsPercentage)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.StartDate)
+        @Html.TextBoxFor(model => model.StartDate, "{0:yyyy-MM-dd}", new { @type = "date", @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.EndDate)
+        @Html.TextBoxFor(model => model.EndDate, "{0:yyyy-MM-dd}", new { @type = "date", @class = "form-control" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="@Url.Action("ProductDiscount")" class="btn btn-secondary">Back</a>
+}

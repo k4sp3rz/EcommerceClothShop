@@ -15,8 +15,8 @@ namespace EcommerceClothShop.Models
     public partial class Review
     {
         public int ReviewID { get; set; }
-        public int UserID { get; set; }
-        public int ProductID { get; set; }
+        public Nullable<int> UserID { get; set; }
+        public Nullable<int> ProductID { get; set; }
         public Nullable<int> Rating { get; set; }
         public string Comment { get; set; }
         public Nullable<System.DateTime> CreatedAt { get; set; }

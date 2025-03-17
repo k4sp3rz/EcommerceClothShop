@@ -13,11 +13,7 @@ namespace EcommerceClothShop.Controllers
     {
         private readonly EcommerceClothShopEntities db = new EcommerceClothShopEntities();
 
-        // Retrieve cart from session
-        private List<CartItem> GetCart()
-        {
-            return Session["Cart"] as List<CartItem> ?? new List<CartItem>();
-        }
+
 
         // Display cart
         public ActionResult Index()
@@ -249,33 +245,108 @@ namespace EcommerceClothShop.Controllers
         [HttpPost]
         public JsonResult UpdateCart(int id, int quantity)
         {
-            var cart = GetCart();
-            var cartItem = cart.FirstOrDefault(c => c.Product.ProductID == id);
-            var product = db.Products.Find(id);
+            var cart = Session["Cart"] as List<CartItem> ?? new List<CartItem>();
+            var item = cart.FirstOrDefault(c => c.Product.ProductID == id);
 
-            if (cartItem != null && product != null)
+            if (item != null)
             {
-                if (quantity > product.Stock)
+                if (quantity > 0)
                 {
-                    return Json(new { success = false, message = "Not enough stock available." });
+                    item.Quantity = quantity;
+                }
+                else
+                {
+                    cart.Remove(item);
                 }
 
-                cartItem.Quantity = quantity;
+                // Update session
                 Session["Cart"] = cart;
                 Session["CartCount"] = cart.Sum(c => c.Quantity);
 
+                // New fields:
                 return Json(new
                 {
                     success = true,
-                    totalItemPrice = (cartItem.Product.Price * cartItem.Quantity).ToString("N0"),
-                    cartTotal = cart.Sum(c => c.Product.Price * c.Quantity).ToString("N0"),
+                    totalItemPrice = item.Quantity * item.Product.Price,
+                    cartTotal = cart.Sum(c => c.Product.Price * c.Quantity),
                     cartCount = Session["CartCount"]
                 });
             }
 
-            return Json(new { success = false, message = "Product not found in cart." });
+            return Json(new { success = false, message = "Item not found in cart." });
         }
 
+
+        [HttpPost]
+        public JsonResult RemoveFromCart(int id)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"RemoveFromCart called with id: {id}");
+
+                if (id <= 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("Invalid product ID received");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid product ID"
+                    });
+                }
+
+                var cart = GetCart();
+                System.Diagnostics.Debug.WriteLine($"Cart contains {cart.Count} items");
+
+                var item = cart.FirstOrDefault(c => c.Product.ProductID == id);
+                if (item == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Item with ID {id} not found in cart");
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Item not found in cart"
+                    });
+                }
+
+                cart.Remove(item);
+                System.Diagnostics.Debug.WriteLine($"Item {id} removed, new cart count: {cart.Count}");
+
+                Session["Cart"] = cart;
+                Session["CartCount"] = cart.Sum(c => c.Quantity);
+
+                var response = new
+                {
+                    success = true,
+                    cartCount = Session["CartCount"],
+                    cartTotal = cart.Sum(c => c.Product.Price * c.Quantity).ToString("N0")
+                };
+
+                System.Diagnostics.Debug.WriteLine($"Returning success response: {Newtonsoft.Json.JsonConvert.SerializeObject(response)}");
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in RemoveFromCart: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                return Json(new
+                {
+                    success = false,
+                    message = $"Error removing item: {ex.Message}"
+                });
+            }
+        }
+
+        // Ensure GetCart is robust
+        private List<CartItem> GetCart()
+        {
+            var cart = Session["Cart"] as List<CartItem>;
+            if (cart == null)
+            {
+                cart = new List<CartItem>();
+                Session["Cart"] = cart;
+                System.Diagnostics.Debug.WriteLine("Initialized new cart in session");
+            }
+            return cart;
+        }
     }
 
     public class CartItem
